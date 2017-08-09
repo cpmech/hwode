@@ -6,3 +6,14 @@ cmake_install.cmake
 *.a
 *.o
 *.so
+
+dr1_radau5
+dr2_radau5
+dr_dop853
+dr_dopri5
+dr_odex
+dr_odex2
+dr_radau
+dr_retard
+dr_rodas
+dr_seulex

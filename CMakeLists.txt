@@ -1,17 +1,27 @@
 cmake_minimum_required(VERSION 3.5)
 project(hwode)
 
+option(OPTIMIZED "optimized (-O2)" OFF)
+option(VERBOSE "verbose" OFF)
+if(OPTIMIZED)
+	add_definitions(-O2)
+endif(OPTIMIZED)
+if(VERBOSE)
+	set(CMAKE_VERBOSE_MAKEFILE TRUE)
+endif(VERBOSE)
+
 enable_language(Fortran)
 
 include(FindLAPACK)
 
-set(libs    ${libs}   ${LAPACK_LIBRARIES})
-set(lflags "${lflags} ${LAPACK_LINKER_FLAGS}")
+set(LIBS    ${LIBS}   ${LAPACK_LIBRARIES})
+set(LFLAGS "${LFLAGS} ${LAPACK_LINKER_FLAGS}")
 
 file(GLOB all *.f)
 
-add_library(hwode SHARED
+add_library(hwode STATIC
     hinit.f
+    dc_lapack.f
     dop853.f
     dopri5.f
     odex2.f
@@ -22,7 +32,10 @@ add_library(hwode SHARED
     rodas.f
     seulex.f
 )
+target_link_libraries(hwode ${LIBS})
+set_target_properties(hwode PROPERTIES COMPILE_FLAGS "${FLAGS}" LINK_FLAGS "${LFLAGS}")
 
-#add_executable(calllapack ${all})
-#target_link_libraries(calllapack ${libs})
-#set_target_properties(calllapack PROPERTIES COMPILE_FLAGS "${flags}" LINK_FLAGS "${lflags}")
+set(LFLAGS "-L.")
+set(LIBS ${LIBS} hwode)
+
+subdirs(examples)
