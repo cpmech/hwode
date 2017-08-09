@@ -3,4 +3,6 @@ CMakeFiles/
 Makefile
 cmake_install.cmake
 
-calllapack
+*.a
+*.o
+*.so

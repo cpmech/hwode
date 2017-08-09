@@ -11,6 +11,7 @@ set(lflags "${lflags} ${LAPACK_LINKER_FLAGS}")
 file(GLOB all *.f)
 
 add_library(hwode SHARED
+    hinit.f
     dop853.f
     dopri5.f
     odex2.f
