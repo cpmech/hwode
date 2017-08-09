@@ -1,0 +1,213 @@
+C
+      SUBROUTINE FPLATE (N, X, Y, F, RPAR, IPAR)
+      IMPLICIT REAL*8 (A-H,O-Z)
+      DIMENSION Y(N), F(N)
+      COMMON/TRANS/NX,NXM1,NY,NYM1,NDEMI,NACHS1,NACHS2,NDUMMY,
+     &       OMEGA,STIFFN,DELX,USH4,FAC,WEIGHT
+      DO 1 I=1,NX
+      DO 1 J=1,NY
+      K=I+NX*(J-1)
+C -------- SECOND DERIVATIVE ----
+      F(K)=Y(K+NDEMI)
+C ------ CENTRAL POINT---
+      UC=16.D0*Y(K)
+      IF(I.GT.1)THEN
+         UC=UC+Y(K)
+         UC=UC-8.D0*Y(K-1)
+      END IF
+      IF(I.LT.NX)THEN
+         UC=UC+Y(K)
+         UC=UC-8.D0*Y(K+1)
+      END IF
+      IF(J.GT.1)THEN
+         UC=UC+Y(K)
+         UC=UC-8.D0*Y(K-NX)
+      END IF
+      IF(J.LT.NY)THEN
+         UC=UC+Y(K)
+         UC=UC-8.D0*Y(K+NX)
+      END IF
+      IF(I.GT.1 .AND.J.GT.1 )UC=UC+2.D0*Y(K-NX-1)
+      IF(I.LT.NX.AND.J.GT.1 )UC=UC+2.D0*Y(K-NX+1)
+      IF(I.GT.1 .AND.J.LT.NY)UC=UC+2.D0*Y(K+NX-1)
+      IF(I.LT.NX.AND.J.LT.NY)UC=UC+2.D0*Y(K+NX+1)
+      IF(I.GT.2)UC=UC+Y(K-2)
+      IF(I.LT.NXM1)UC=UC+Y(K+2)
+      IF(J.GT.2)UC=UC+Y(K-2*NX)
+      IF(J.LT.NYM1)UC=UC+Y(K+2*NX)
+      IF(J.EQ.NACHS1.OR.J.EQ.NACHS2)THEN
+         XI=I*DELX
+         FORCE=EXP(-5.D0*(X-XI-2.D0)**2)+EXP(-5.D0*(X-XI-5.D0)**2)
+      ELSE
+         FORCE=0.D0
+      END IF
+      F(K+NDEMI)=-OMEGA*Y(K+NDEMI)-FAC*UC+FORCE*WEIGHT
+  1   CONTINUE
+      RETURN
+      END
+c
+      SUBROUTINE JPLATE(N,X,Y,DFY,LDFY,RPAR,IPAR)
+C -------- JACOBIAN FOR PLATE PROBLEM --------
+      IMPLICIT REAL*8 (A-H,O-Z)
+      DIMENSION Y(N),DFY(LDFY,N)
+      COMMON/TRANS/NX,NXM1,NY,NYM1,NDEMI,NACHS1,NACHS2,NDUMMY,
+     &       OMEGA,STIFFN,DELX,USH4,FAC,WEIGHT
+      DO 1 I=1,N
+      DO 1 J=1,N
+  1   DFY(I,J)=0.D0
+C -------- LA BOUCLE -------
+      DO 2 I=1,NX
+      DO 2 J=1,NY
+      K=I+NX*(J-1)
+C -------- DERIVEE DEUXIEME ----
+      DFY(K,K+NDEMI)=1.D0
+C ------ POINT CENTRAL ---
+      DFY(K+NDEMI,K)=-FAC*16.D0
+      IF(I.GT.1)THEN
+         DFY(K+NDEMI,K)=DFY(K+NDEMI,K)-FAC
+         DFY(K+NDEMI,K-1)=FAC*8.D0
+      END IF
+      IF(I.LT.NX)THEN
+         DFY(K+NDEMI,K)=DFY(K+NDEMI,K)-FAC
+         DFY(K+NDEMI,K+1)=FAC*8.D0
+      END IF
+      IF(J.GT.1)THEN
+         DFY(K+NDEMI,K)=DFY(K+NDEMI,K)-FAC
+         DFY(K+NDEMI,K-NX)=FAC*8.D0
+      END IF
+      IF(J.LT.NY)THEN
+         DFY(K+NDEMI,K)=DFY(K+NDEMI,K)-FAC
+         DFY(K+NDEMI,K+NX)=FAC*8.D0
+      END IF
+      IF(I.GT.1 .AND.J.GT.1 )DFY(K+NDEMI,K-NX-1)=-FAC*2.D0
+      IF(I.LT.NX.AND.J.GT.1 )DFY(K+NDEMI,K-NX+1)=-FAC*2.D0
+      IF(I.GT.1 .AND.J.LT.NY)DFY(K+NDEMI,K+NX-1)=-FAC*2.D0
+      IF(I.LT.NX.AND.J.LT.NY)DFY(K+NDEMI,K+NX+1)=-FAC*2.D0
+      IF(I.GT.2)DFY(K+NDEMI,K-2)=-FAC
+      IF(I.LT.NXM1)DFY(K+NDEMI,K+2)=-FAC
+      IF(J.GT.2)DFY(K+NDEMI,K-2*NX)=-FAC
+      IF(J.LT.NYM1)DFY(K+NDEMI,K+2*NX)=-FAC
+      DFY(K+NDEMI,K+NDEMI)= -OMEGA
+  2   CONTINUE
+      RETURN
+      END
+c
+      SUBROUTINE JPLATS(N,X,Y,DFY,LDFY,RPAR,IPAR)
+C -------- JACOBIAN FOR PLATE PROBLEM, IN THE CASE WHERE THE OPTION
+C -------- IWORK(9)=N/2 IS USED --------
+      IMPLICIT REAL*8 (A-H,O-Z)
+      DIMENSION Y(N),DFY(LDFY,N)
+      COMMON/TRANS/NX,NXM1,NY,NYM1,NDEMI,NACHS1,NACHS2,NDUMMY,
+     &       OMEGA,STIFFN,DELX,USH4,FAC,WEIGHT
+C------ METTRE A ZERO -------
+      DO 1 I=1,NDEMI
+      DO 1 J=1,N
+  1   DFY(I,J)=0.D0
+C -------- LA BOUCLE -------
+      DO 2 I=1,NX
+      DO 2 J=1,NY
+      K=I+NX*(J-1)
+C ------ POINT CENTRAL ---
+      DFY(K,K)=-FAC*16.D0
+      IF(I.GT.1)THEN
+         DFY(K,K)=DFY(K,K)-FAC
+         DFY(K,K-1)=FAC*8.D0
+      END IF
+      IF(I.LT.NX)THEN
+         DFY(K,K)=DFY(K,K)-FAC
+         DFY(K,K+1)=FAC*8.D0
+      END IF
+      IF(J.GT.1)THEN
+         DFY(K,K)=DFY(K,K)-FAC
+         DFY(K,K-NX)=FAC*8.D0
+      END IF
+      IF(J.LT.NY)THEN
+         DFY(K,K)=DFY(K,K)-FAC
+         DFY(K,K+NX)=FAC*8.D0
+      END IF
+      IF(I.GT.1 .AND.J.GT.1 )DFY(K,K-NX-1)=-FAC*2.D0
+      IF(I.LT.NX.AND.J.GT.1 )DFY(K,K-NX+1)=-FAC*2.D0
+      IF(I.GT.1 .AND.J.LT.NY)DFY(K,K+NX-1)=-FAC*2.D0
+      IF(I.LT.NX.AND.J.LT.NY)DFY(K,K+NX+1)=-FAC*2.D0
+      IF(I.GT.2)DFY(K,K-2)=-FAC
+      IF(I.LT.NXM1)DFY(K,K+2)=-FAC
+      IF(J.GT.2)DFY(K,K-2*NX)=-FAC
+      IF(J.LT.NYM1)DFY(K,K+2*NX)=-FAC
+      DFY(K,K+NDEMI)= -OMEGA
+  2   CONTINUE
+      RETURN
+      END
+c
+      SUBROUTINE JPLATSB(N,X,Y,DFY,LDFY,RPAR,IPAR)
+C -------- JACOBIAN FOR PLATE PROBLEM, IN THE CASE WHERE THE OPTION
+C -------- IWORK(9)=N/2 AND THE BANDED STRUCTURE IS USED --------
+      IMPLICIT REAL*8 (A-H,O-Z)
+      DIMENSION Y(N),DFY(LDFY,N)
+      COMMON/TRANS/NX,NXM1,NY,NYM1,NDEMI,NACHS1,NACHS2,NDUMMY,
+     &       OMEGA,STIFFN,DELX,USH4,FAC,WEIGHT
+C------ METTRE A ZERO -------
+      DO 1 I=1,LDFY
+      DO 1 J=1,N
+  1   DFY(I,J)=0.D0
+      MU=2*NX+1
+      FAC2=FAC*2.0D0
+      FAC8=FAC*8.0D0
+      FAC16=FAC*16.0D0
+C -------- LA BOUCLE -------
+      DO 2 I=1,NX
+      DO 2 J=1,NY
+      K=I+NX*(J-1)
+C ------ POINT CENTRAL ---
+      DFY(MU,K)=-FAC16
+      IF(I.GT.1)THEN
+         DFY(MU,K)=DFY(MU,K)-FAC
+         DFY(MU+1,K-1)=FAC8
+      END IF
+      IF(I.LT.NX)THEN
+         DFY(MU,K)=DFY(MU,K)-FAC
+         DFY(MU-1,K+1)=FAC8
+      END IF
+      IF(J.GT.1)THEN
+         DFY(MU,K)=DFY(MU,K)-FAC
+         DFY(MU+NX,K-NX)=FAC8
+      END IF
+      IF(J.LT.NY)THEN
+         DFY(MU,K)=DFY(MU,K)-FAC
+         DFY(MU-NX,K+NX)=FAC8
+      END IF
+      IF(I.GT.1 .AND.J.GT.1 )DFY(MU+NX+1,K-NX-1)=-FAC2
+      IF(I.LT.NX.AND.J.GT.1 )DFY(MU+NX-1,K-NX+1)=-FAC2
+      IF(I.GT.1 .AND.J.LT.NY)DFY(MU-NX+1,K+NX-1)=-FAC2
+      IF(I.LT.NX.AND.J.LT.NY)DFY(MU-NX-1,K+NX+1)=-FAC2
+      IF(I.GT.2)DFY(MU+2,K-2)=-FAC
+      IF(I.LT.NXM1)DFY(MU-2,K+2)=-FAC
+      IF(J.GT.2)DFY(MU+2*NX,K-2*NX)=-FAC
+      IF(J.LT.NYM1)DFY(MU-2*NX,K+2*NX)=-FAC
+      DFY(MU,K+NDEMI)= -OMEGA
+  2   CONTINUE
+      RETURN
+      END
+
+      SUBROUTINE XPLATE(N,X,Y,FX,RPAR,IPAR)
+C -------- DERIVATIVE OF F WITH RESPECT TO X --------
+      IMPLICIT REAL*8 (A-H,O-Z)
+      DIMENSION Y(N),FX(N)
+      COMMON/TRANS/NX,NXM1,NY,NYM1,NDEMI,NACHS1,NACHS2,NDUMMY,
+     &       OMEGA,STIFFN,DELX,USH4,FAC,WEIGHT
+C -------- METTRE A ZERO --------
+      DO 1 I=1,N
+   1  FX(I)=0.D0
+C -------- LA BOUCLE -------
+      DO 4 I=1,NX
+      DO 4 J=1,NY
+      K=I+NX*(J-1)
+      IF(J.EQ.NACHS1.OR.J.EQ.NACHS2)THEN
+         XI=I*DELX
+         FX(K+NDEMI)=WEIGHT*(
+     &             -10.D0*(X-XI-2.D0)*EXP(-5.D0*(X-XI-2.D0)**2)
+     &             -10.D0*(X-XI-5.D0)*EXP(-5.D0*(X-XI-5.D0)**2))
+      END IF
+   4  CONTINUE
+      RETURN
+      END
+

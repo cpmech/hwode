@@ -38,4 +38,4 @@ set_target_properties(hwode PROPERTIES COMPILE_FLAGS "${FLAGS}" LINK_FLAGS "${LF
 set(LFLAGS "-L.")
 set(LIBS ${LIBS} hwode)
 
-subdirs(examples)
+subdirs(examples tests)
