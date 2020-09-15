@@ -1,6 +1,10 @@
-# ODE codes from Hairer, Norsett and Wanner books
+# Fortran codes for ordinary differential equations
 
-See [Prof Ernst Hairer' website](http://www.unige.ch/~hairer/software.html)
+This repository includes code from Hairer, Norsett and Wanner books.
+
+Here, we present the CMake toolchain for compiling all code.
+
+Please check out [Prof Ernst Hairer' website](http://www.unige.ch/~hairer/software.html)
 
 References:
 
@@ -32,3 +36,17 @@ References:
    matrix M; with dense output; algebraic order conditions are considered
 9. SEULEX Extrapolation method based on linearly implicit Euler for problems of the form My'=f(x,y)
    with possibly singular matrix M; with dense output
+
+## Usage
+
+The code is easily compiled using CMake.
+
+On a Debian-based Linux system, type:
+
+```bash
+ccmake .
+```
+
+Then choose [c], [c] again, and [g]. Close Cmake and type `make`. Done.
+
+All tests should ready to run run from within the tests directory.
