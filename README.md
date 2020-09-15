@@ -1,8 +1,9 @@
 # ODE codes from Hairer, Norsett and Wanner books
 
-See [Prof Ernst Hairer webpage](http://www.unige.ch/~hairer/software.html)
+See [Prof Ernst Hairer' website](http://www.unige.ch/~hairer/software.html)
 
 References:
+
 ```
 [1] Hairer, Norsett and Wanner (1993): Solving Ordinary Differential Equations.
     Nonstiff Problems. 2nd edition. Springer Series in Comput. Math., vol. 8.
