@@ -44,9 +44,7 @@ The code is easily compiled using CMake.
 On a Debian-based Linux system, type:
 
 ```bash
-ccmake .
+./all.bash
 ```
 
-Then choose [c], [c] again, and [g]. Close Cmake and type `make`. Done.
-
-All tests should ready to run run from within the tests directory.
+All binaries should be ready to run from the `/tmp/build-hwode/tests` directory.
