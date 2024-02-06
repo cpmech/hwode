@@ -47,4 +47,4 @@ On a Debian-based Linux system, type:
 ./all.bash
 ```
 
-All binaries should be ready to run from the `/tmp/build-hwode/tests` directory.
+The examples can be run from `/tmp/build-hwode/examples` and `/tmp/build-hwode/tests`.
