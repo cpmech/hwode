@@ -3,9 +3,13 @@ project(hwode)
 
 option(OPTIMIZED "optimized (-O2)" OFF)
 option(VERBOSE "verbose" OFF)
+
 if(OPTIMIZED)
 	add_definitions(-O2)
+else(OPTIMIZED)
+    add_definitions(-g)
 endif(OPTIMIZED)
+
 if(VERBOSE)
 	set(CMAKE_VERBOSE_MAKEFILE TRUE)
 endif(VERBOSE)

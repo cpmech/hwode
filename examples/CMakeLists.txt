@@ -1,4 +1,5 @@
 set(EXAMPLES
+    dr0_radau5
     dr1_radau5
     dr2_radau5
     dr_dop853
