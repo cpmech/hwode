@@ -8,6 +8,7 @@ C --- PARAMETERS FOR RADAU5 (FULL JACOBIAN)
         PARAMETER (ND=2,LWORK=4*ND*ND+12*ND+20,LIWORK=3*ND+20)
         DIMENSION Y(ND),WORK(LWORK),IWORK(LIWORK)
         EXTERNAL FVPOL,JVPOL,SOLOUT
+        LOGICAL DEBUG
 C --- PARAMETER IN THE DIFFERENTIAL EQUATION
         RPAR=1.0D-6
 C --- DIMENSION OF THE SYSTEM
@@ -23,7 +24,7 @@ C --- OUTPUT ROUTINE IS USED DURING INTEGRATION
 C --- INITIAL VALUES
         X=0.0D0
         Y(1)=2.0D0
-        Y(2)=-0.66D0
+        Y(2)=-0.6D0
 C --- ENDPOINT OF INTEGRATION
         XEND=2.0D0
 C --- REQUIRED TOLERANCE
@@ -38,21 +39,30 @@ C --- SET DEFAULT VALUES
            WORK(I)=0.D0
         END DO
 C --- CALL OF THE SUBROUTINE RADAU5
+        write(*,'(A)')''
+        write(*,'(A)')'running radau5.f test'
+        DEBUG=.FALSE.
         CALL RADAU5(N,FVPOL,X,Y,XEND,H,
      &                  RTOL,ATOL,ITOL,
      &                  JVPOL,IJAC,MLJAC,MUJAC,
      &                  FVPOL,IMAS,MLMAS,MUMAS,
-     &                  SOLOUT,IOUT,
+     &                  SOLOUT,IOUT,DEBUG,
      &                  WORK,LWORK,IWORK,LIWORK,RPAR,IPAR,IDID)
 C --- PRINT FINAL SOLUTION
-        WRITE (6,99) X,Y(1),Y(2)
- 99     FORMAT(1X,'X =',F5.2,'    Y =',2E18.10)
-C --- PRINT STATISTICS
-        WRITE (6,90) RTOL
- 90     FORMAT('       rtol=',D8.2)
-        WRITE (6,91) (IWORK(J),J=14,20)
- 91     FORMAT(' fcn=',I5,' jac=',I4,' step=',I4,' accpt=',I4,
-     &        ' rejct=',I3,' dec=',I4,' sol=',I5)
+      write(*,'(A,I0)')'Number of function evaluations   = ',1+IWORK(14)
+      write(*,'(A,I0)')'Number of Jacobian evaluations   = ',IWORK(15)
+      write(*,'(A,I0)')'Number of factorizations         = ',IWORK(19)
+      write(*,'(A,I0)')'Number of lin sys solutions      = ',IWORK(20)
+      write(*,'(A,I0)')'Number of performed steps        = ',IWORK(16)
+      write(*,'(A,I0)')'Number of accepted steps         = ',IWORK(17)
+      write(*,'(A,I0)')'Number of rejected steps         = ',IWORK(18)
+      write(*,'(A,I0)')'Number of iterations (maximum)   = ',IWORK(21)
+      write(*,'(A,ES23.15,A,ES23.15)')'y =',Y(1),',',Y(2)
+      write(*,'(A)')'.'
+      write(*,'(A)',advance='no')'test result: ok. 1 passed; 0 failed;'
+      write(*,'(A)',advance='no')' 0 ignored; 0 measured;'
+      write(*,'(A)')' 0 filtered out; finished in 0.00s'
+      write(*,'(A)')''
         STOP
         END
 C

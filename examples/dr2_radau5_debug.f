@@ -80,7 +80,7 @@ C --- SET DEFAULT VALUES
 C --- CALL OF THE SUBROUTINE RADAU5
         write(*,'(A)')''
         write(*,'(A)')'running radau5.f test'
-        DEBUG=.FALSE.
+        DEBUG=.TRUE.
         CALL RADAU5(N,FAMPL,X,Y,XEND,H,
      &                  RTOL,ATOL,ITOL,
      &                  JBAMPL,IJAC,MLJAC,MUJAC,
@@ -113,20 +113,6 @@ C --- BY USING "CONTR5"
         IMPLICIT REAL*8 (A-H,O-Z)
         DIMENSION Y(N),CONT(LRC)
         COMMON /INTERN/XOUT
-        IF (NR.EQ.1) THEN
-           WRITE (6,99) X,Y(1),Y(2),NR-1
-           XOUT=0.0025D0
-        ELSE
- 10        CONTINUE
-           IF (X.GE.XOUT) THEN
-C --- CONTINUOUS OUTPUT FOR RADAU5
-              WRITE (6,99) XOUT,CONTR5(1,XOUT,CONT,LRC),
-     &                     CONTR5(2,XOUT,CONT,LRC),NR-1
-              XOUT=XOUT+0.0025D0
-              GOTO 10
-           END IF
-        END IF
- 99     FORMAT(1X,'X =',F7.4,'    Y =',2E18.10,'    NSTEP =',I4)
         RETURN
         END
 C

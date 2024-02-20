@@ -10,6 +10,7 @@ C -------- END PARAMETER LIST --------
         COMMON/NERVES/NNERV
         COMMON/DIFFCOEF/DIFFUS
         EXTERNAL FCUSP,JCUSP,SOLOUT
+        LOGICAL DEBUG
 c ------ FILE DE DONNEES ----------
         OPEN(8,FILE='res_rad5')
         REWIND 8
@@ -58,11 +59,12 @@ C --- ENDPOINT OF INTEGRATION
         XEND=1.1D0
         CALL DTIME(TARRAY,TRESULT)
 C --- CALL OF THE SUBROUTINE RADAU5
+        DEBUG=.FALSE.
         CALL RADAU5(N,FCUSP,X,Y,XEND,H,
      &                  RTOL,ATOL,ITOL,
      &                  FCUSP,IJAC,MLJAC,MUJAC,
      &                  FCUSP,IMAS,MLMAS,MUMAS,
-     &                  SOLOUT,IOUT,
+     &                  SOLOUT,IOUT,DEBUG,
      &                  WORK,LWORK,IWORK,LIWORK,RPAR,IPAR,IDID)
 C --- PRINT SOLUTION
         CALL DTIME(TARRAY,TRESULT)

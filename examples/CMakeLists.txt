@@ -1,7 +1,11 @@
 set(EXAMPLES
+    dr0_radau5_debug
     dr0_radau5
+    dr1_radau5_debug
     dr1_radau5
+    dr2_radau5_debug
     dr2_radau5
+    dr3_radau5
     dr_dop853
     dr_dopri5
     dr_odex2

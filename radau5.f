@@ -2,7 +2,7 @@
      &                  RTOL,ATOL,ITOL,
      &                  JAC ,IJAC,MLJAC,MUJAC,
      &                  MAS ,IMAS,MLMAS,MUMAS,
-     &                  SOLOUT,IOUT,
+     &                  SOLOUT,IOUT,DEBUG,
      &                  WORK,LWORK,IWORK,LIWORK,RPAR,IPAR,IDID)
 C ----------------------------------------------------------
 C     NUMERICAL SOLUTION OF A STIFF (OR DIFFERENTIAL ALGEBRAIC)
@@ -374,7 +374,7 @@ C *** *** *** *** *** *** *** *** *** *** *** *** ***
       IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       DIMENSION Y(N),ATOL(*),RTOL(*),WORK(LWORK),IWORK(LIWORK)
       DIMENSION RPAR(*),IPAR(*)
-      LOGICAL IMPLCT,JBAND,ARRET,STARTN,PRED
+      LOGICAL IMPLCT,JBAND,ARRET,STARTN,PRED,DEBUG
       EXTERNAL FCN,JAC,MAS,SOLOUT
 C *** *** *** *** *** *** ***
 C        SETTING THE PARAMETERS 
@@ -638,7 +638,7 @@ C -------- CALL TO CORE INTEGRATOR ------------
      &   WORK(IEF3),WORK(IEJAC),WORK(IEE1),WORK(IEE2R),WORK(IEE2I),
      &   WORK(IEMAS),IWORK(IEIP1),IWORK(IEIP2),IWORK(IEIPH),
      &   WORK(IECON),NFCN,NJAC,NSTEP,NACCPT,NREJCT,NDEC,NSOL,NITMAX,
-     &   RPAR,IPAR)
+     &   RPAR,IPAR,DEBUG)
       IWORK(14)=NFCN
       IWORK(15)=NJAC
       IWORK(16)=NSTEP
@@ -675,7 +675,7 @@ C
      &   IMPLCT,BANDED,LDJAC,LDE1,LDMAS,Z1,Z2,Z3,
      &   Y0,SCAL,F1,F2,F3,FJAC,E1,E2R,E2I,FMAS,IP1,IP2,IPHES,
      &   CONT,NFCN,NJAC,NSTEP,NACCPT,NREJCT,NDEC,NSOL,NITMAX,
-     &   RPAR,IPAR)
+     &   RPAR,IPAR,DEBUG)
 C ----------------------------------------------------------
 C     CORE INTEGRATOR FOR RADAU5
 C     PARAMETERS SAME AS IN RADAU5 WITH WORKSPACE ADDED 
@@ -691,7 +691,7 @@ C ----------------------------------------------------------
       COMMON /CONRA5/NN,NN2,NN3,NN4,XSOL,HSOL,C2M1,C1M1
       COMMON/LINAL/MLE,MUE,MBJAC,MBB,MDIAG,MDIFF,MBDIAG
       LOGICAL REJECT,FIRST,IMPLCT,BANDED,CALJAC,STARTN,CALHES
-      LOGICAL INDEX1,INDEX2,INDEX3,LAST,PRED
+      LOGICAL INDEX1,INDEX2,INDEX3,LAST,PRED,DEBUG
       EXTERNAL FCN
 C *** *** *** *** *** *** ***
 C  INITIALISATIONS
@@ -950,6 +950,11 @@ C ---     SOLVE THE LINEAR SYSTEMS
      &          +(Z3(I)/DENOM)**2
             END DO
             DYNO=DSQRT(DYNO/N3)
+C --- Dorival
+            IF (DEBUG) THEN
+            write(*,'(A,I5,A,I5,A,es23.15)')'step = ',NSTEP,', newt = ',
+     &      NEWT,', ldw =',DYNO
+            END IF
             if (NEWT.GT.NITMAX) NITMAX=NEWT
 C ---     BAD CONVERGENCE OR NUMBER OF ITERATIONS TO LARGE
             IF (NEWT.GT.1.AND.NEWT.LT.NIT) THEN

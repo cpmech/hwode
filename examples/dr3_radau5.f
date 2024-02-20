@@ -3,7 +3,7 @@ C --- DRIVER FOR RADAU5 ON BRUSSELATOR 1D PROBLEM
 C * * * * * * * * * * * * * * * * * * * * * * * * *
         IMPLICIT REAL*8 (A-H,O-Z)
 C --- PARAMETERS FOR RADAU5 
-        PARAMETER (ND=1000,NL=2,NU=2)
+        PARAMETER (ND=2000,NL=2,NU=2)
         PARAMETER (LWORK=(7*NL+4*NU+16)*ND+20,LIWORK=3*ND+20)
         DIMENSION Y(ND),WORK(LWORK),IWORK(LIWORK),ISTAT(20)
         COMMON/PARAM/N,N2,GAMMA,GAMMA2
@@ -16,14 +16,14 @@ c ------ FILE DE DONNEES ----------
         REWIND 8
 c -------- INITIAL CONSTANTES --------
         PI=3.14159265358979324D0
-        N=500
+        N=20
         N2=2*N
         USDELQ=(DBLE(N+1))**2
         GAMMA=0.02D0*USDELQ
         GAMMA2=2.D0*GAMMA
 C --- LOOP FOR DIFFERENT TOLERANCES
-        NTOLMN=2
-        NTOLMX=10
+        NTOLMN=5
+        NTOLMX=5
         NTOLDF=4
         NRLOOP=(NTOLMX-NTOLMN)*NTOLDF+1
         TOLST=0.1D0**NTOLMN
@@ -36,7 +36,7 @@ C ---------- VAL INIT ------------
         ANP1=N+1
         XI=I/ANP1
         Y(2*I)=3.D0
-   1    Y(2*I-1)=1.D0+0.5D0*DSIN(2.D0*PI*XI)
+   1    Y(2*I-1)=1.D0+DSIN(2.D0*PI*XI)
 C --- COMPUTE THE JACOBIAN NUMERICALLY
         IJAC=1
 C --- JACOBIAN IS NOT FULL
@@ -69,14 +69,16 @@ C --- SET DEFAULT VALUES
      &                  WORK,LWORK,IWORK,LIWORK,RPAR,IPAR,IDID)
 C --- PRINT SOLUTION
         CALL DTIME(TARRAY,TRESULT)
-        WRITE(8,9921)(Y(I),I=1,995,7)
- 9921   FORMAT(1X,F22.16)
+        WRITE(8,9920)('y')
+        WRITE(8,9921)(Y(I),I=1,N2)
+ 9920   FORMAT(A23)
+ 9921   FORMAT(E23.16)
 C --- PRINT STATISTICS
          DO J=14,20
             ISTAT(J)=ISTAT(J)+IWORK(J)
          END DO
-        WRITE(8,*)TARRAY(1)
-        WRITE (8,*)(ISTAT(J),J=14,20)
+C        WRITE(8,*)TARRAY(1)
+C        WRITE (8,*)(ISTAT(J),J=14,20)
         WRITE(6,*)' ***** TOL=',RTOL,'  ELAPSED TIME=',TARRAY(1),' ****'
         WRITE (6,91) (ISTAT(J),J=14,20)
  91     FORMAT(' fcn=',I5,' jac=',I4,' step=',I4,
@@ -94,5 +96,74 @@ C
         DIMENSION Y(N),CONT(LRC)
            WRITE (6,99) X,Y(1),Y(2),Y(3),NR-1
  99     FORMAT(1X,'X =',F11.4,'    Y =',3E18.10,'    NSTEP =',I4)
+        RETURN
+        END
+C
+        SUBROUTINE FBRUS(NNN,X,Y,F,RPAR,IPAR)
+        IMPLICIT REAL*8 (A-H,O-Z)
+        DIMENSION Y(NNN),F(NNN)
+        COMMON/PARAM/N,N2,GAMMA,GAMMA2
+        I=1
+        IU=2*I-1
+        IV=2*I
+        UI=Y(IU)
+        VI=Y(IV)
+            UIM=1.D0
+            VIM=3.D0
+            UIP=Y(IU+2)
+            VIP=Y(IV+2)
+        PROD=UI*UI*VI
+        F(IU)=1.D0+PROD-4.D0*UI+GAMMA*(UIM-2.D0*UI+UIP)
+        F(IV)=3.D0*UI-PROD+GAMMA*(VIM-2.D0*VI+VIP)
+        DO 5 I=2,N-1
+        IU=2*I-1
+        IV=2*I
+        UI=Y(IU)
+        VI=Y(IV)
+            UIM=Y(IU-2)
+            VIM=Y(IV-2)
+            UIP=Y(IU+2)
+            VIP=Y(IV+2)
+        PROD=UI*UI*VI
+        F(IU)=1.D0+PROD-4.D0*UI+GAMMA*(UIM-2.D0*UI+UIP)
+        F(IV)=3.D0*UI-PROD+GAMMA*(VIM-2.D0*VI+VIP)
+    5   CONTINUE
+        I=N
+        IU=2*I-1
+        IV=2*I
+        UI=Y(IU)
+        VI=Y(IV)
+            UIM=Y(IU-2)
+            VIM=Y(IV-2)
+            UIP=1.D0
+            VIP=3.D0
+        PROD=UI*UI*VI
+        F(IU)=1.D0+PROD-4.D0*UI+GAMMA*(UIM-2.D0*UI+UIP)
+        F(IV)=3.D0*UI-PROD+GAMMA*(VIM-2.D0*VI+VIP)
+        RETURN
+        END
+C
+        SUBROUTINE JBRUS(NN,X,Y,DFY,LDFY,RPAR,IPAR)
+        IMPLICIT REAL*8 (A-H,O-Z)
+        DIMENSION Y(NN),DFY(LDFY,NN)
+        COMMON/PARAM/N,N2,GAMMA,GAMMA2
+        DO 1 I=1,N
+        IU=2*I-1
+        IV=2*I
+        UI=Y(IU)
+        VI=Y(IV)
+        UIVI=UI*VI
+        UI2=UI*UI
+        DFY(3,IU)=2.D0*UIVI-4.D0-GAMMA2
+        DFY(2,IV)=UI2
+        DFY(4,IU)=3.D0-2.D0*UIVI
+        DFY(3,IV)=-UI2-GAMMA2
+        DFY(2,IU)=0.D0
+        DFY(4,IV)=0.D0
+    1   CONTINUE
+        DO 2 I=1,N2-2
+        DFY(1,I+2)=GAMMA
+        DFY(5,I)=GAMMA
+    2   CONTINUE
         RETURN
         END

@@ -8,6 +8,7 @@ C --- PARAMETERS FOR RADAU5 (FULL JACOBIAN)
 C -------- END PARAMETER LIST --------
         REAL*4 TARRAY(2),TRESULT
         EXTERNAL FVANDER,JVANDER,SOLOUT
+        LOGICAL DEBUG
 c ------ FILE DE DONNEES ----------
         OPEN(8,FILE='res_rad5')
         REWIND 8
@@ -51,11 +52,12 @@ C --- ENDPOINT OF INTEGRATION
         CALL DTIME(TARRAY,TRESULT)
         DO 20 I=1,11
 C --- CALL OF THE SUBROUTINE RADAU5 (OR SDIRK4)
+        DEBUG=.FALSE.
         CALL RADAU5(N,FVANDER,X,Y,XEND,H,
      &                  RTOL,ATOL,ITOL,
      &                  JVANDER,IJAC,MLJAC,MUJAC,
      &                  FVANDER,IMAS,MLMAS,MUMAS,
-     &                  SOLOUT,IOUT,
+     &                  SOLOUT,IOUT,DEBUG,
      &                  WORK,LWORK,IWORK,LIWORK,RPAR,IPAR,IDID)
 C --- PRINT SOLUTION
         WRITE (8,*) Y(1)
