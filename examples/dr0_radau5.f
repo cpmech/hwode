@@ -58,11 +58,6 @@ C --- PRINT FINAL SOLUTION
       write(*,'(A,I0)')'Number of iterations (maximum)   = ',IWORK(21)
       write(*,'(A,ES23.15)')'y =',Y(1)
       write(*,'(A,ES23.15)')'h =',H
-      write(*,'(A)')'.'
-      write(*,'(A)',advance='no')'test result: ok. 1 passed; 0 failed;'
-      write(*,'(A)',advance='no')' 0 ignored; 0 measured;'
-      write(*,'(A)')' 0 filtered out; finished in 0.00s'
-      write(*,'(A)')''
         STOP
         END
 C
