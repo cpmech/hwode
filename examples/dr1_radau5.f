@@ -57,7 +57,8 @@ C --- PRINT FINAL SOLUTION
       write(*,'(A,I0)')'Number of accepted steps         = ',IWORK(17)
       write(*,'(A,I0)')'Number of rejected steps         = ',IWORK(18)
       write(*,'(A,I0)')'Number of iterations (maximum)   = ',IWORK(21)
-      write(*,'(A,ES23.15,A,ES23.15)')'y =',Y(1),',',Y(2)
+      write(*,'(A,ES23.15,ES23.15)')'y =',Y(1),Y(2)
+      write(*,'(A,ES23.15)')'h =',H
       write(*,'(A)')'.'
       write(*,'(A)',advance='no')'test result: ok. 1 passed; 0 failed;'
       write(*,'(A)',advance='no')' 0 ignored; 0 measured;'
@@ -73,19 +74,19 @@ C --- PRINTS SOLUTION AT EQUIDISTANT OUTPUT-POINTS BY USING "CONTR5"
         DIMENSION Y(N),CONT(LRC)
         COMMON /INTERN/XOUT
         IF (NR.EQ.1) THEN
-           WRITE (6,99) X,Y(1),Y(2),NR-1
+           WRITE (6,99) NR-1,X,Y(1),Y(2)
            XOUT=0.2D0
         ELSE
  10        CONTINUE
            IF (X.GE.XOUT) THEN
 C --- CONTINUOUS OUTPUT FOR RADAU5
-              WRITE (6,99) XOUT,CONTR5(1,XOUT,CONT,LRC),
-     &                     CONTR5(2,XOUT,CONT,LRC),NR-1
+              WRITE (6,99) NR-1,XOUT,CONTR5(1,XOUT,CONT,LRC),
+     &                     CONTR5(2,XOUT,CONT,LRC)
               XOUT=XOUT+0.2D0
               GOTO 10
            END IF
         END IF
- 99     FORMAT(1X,'X =',F5.2,'    Y =',2E18.10,'    NSTEP =',I4)
+ 99     FORMAT('step =',I4,', x =',F5.2,', y =',2ES23.15)
         RETURN
         END
 C

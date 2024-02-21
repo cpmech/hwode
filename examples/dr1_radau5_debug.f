@@ -57,7 +57,8 @@ C --- PRINT FINAL SOLUTION
       write(*,'(A,I0)')'Number of accepted steps         = ',IWORK(17)
       write(*,'(A,I0)')'Number of rejected steps         = ',IWORK(18)
       write(*,'(A,I0)')'Number of iterations (maximum)   = ',IWORK(21)
-      write(*,'(A,ES23.15,A,ES23.15)')'y =',Y(1),',',Y(2)
+      write(*,'(A,ES23.15,ES23.15)')'y =',Y(1),Y(2)
+      write(*,'(A,ES23.15)')'h =',H
       write(*,'(A)')'.'
       write(*,'(A)',advance='no')'test result: ok. 1 passed; 0 failed;'
       write(*,'(A)',advance='no')' 0 ignored; 0 measured;'

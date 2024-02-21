@@ -952,8 +952,8 @@ C ---     SOLVE THE LINEAR SYSTEMS
             DYNO=DSQRT(DYNO/N3)
 C --- Dorival
             IF (DEBUG) THEN
-            write(*,'(A,I5,A,I5,A,es23.15)')'step = ',NSTEP,', newt = ',
-     &      NEWT,', ldw =',DYNO
+            write(*,'(A,I5,A,I5,A,es23.15,A,es23.15)')'step = ',NSTEP,
+     &      ', newt = ',NEWT,', ldw =',DYNO,', h =',H
             END IF
             if (NEWT.GT.NITMAX) NITMAX=NEWT
 C ---     BAD CONVERGENCE OR NUMBER OF ITERATIONS TO LARGE
