@@ -507,11 +507,12 @@ C ------- STIFFNESS DETECTION
          DO 44 I=1,N
          K1(I)=K2(I)
   44     Y(I)=Y1(I)
-C ------- Dorival
+C ------- Dorival -- start
          IF (DEBUG) THEN
             write(*,'(A,I5,A,es23.15,A,es23.15)')'accept: step = ',
      &      NSTEP,', err =',ERR,', h_new =',HNEW
          END IF
+C ------- Dorival -- end
          XOLD=X
          X=XPH
          IF (IOUT.NE.0) THEN
@@ -535,6 +536,12 @@ C --- STEP IS REJECTED
          REJECT=.TRUE.  
          IF(NACCPT.GE.1)NREJCT=NREJCT+1   
          LAST=.FALSE.
+C ------- Dorival -- start
+         IF (DEBUG) THEN
+            write(*,'(A,I5,A,es23.15,A,es23.15)')'reject: step = ',
+     &      NSTEP,', err =',ERR,', h_new =',HNEW
+         END IF
+C ------- Dorival -- end
       END IF
       H=HNEW
       GOTO 1
