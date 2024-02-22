@@ -48,6 +48,8 @@ C --- CALL OF THE SUBROUTINE RADAU5
      &                  SOLOUT,IOUT,DEBUG,
      &                  WORK,LWORK,IWORK,LIWORK,LAMB,IPAR,IDID)
 C --- PRINT FINAL SOLUTION
+      write(*,'(A)',advance='no')'Radau5: Radau method (Radau IIA) '
+      write(*,'(A)')'(implicit, order 5, embedded)'
       write(*,'(A,I0)')'Number of function evaluations   = ',1+IWORK(14)
       write(*,'(A,I0)')'Number of Jacobian evaluations   = ',IWORK(15)
       write(*,'(A,I0)')'Number of factorizations         = ',IWORK(19)
