@@ -37,7 +37,7 @@ C --- DENSE OUTPUT IS USED FOR THE TWO POSITION COORDINATES 1 AND 2
 C --- CALL OF THE SUBROUTINE DOPRI5   
         write(*,'(A)')''
         write(*,'(A)')'running dopri5.f test'
-        DEBUG=.FALSE.
+        DEBUG=.TRUE.
         CALL DOPRI5(N,FAREN,X,Y,XEND,
      &              RTOL,ATOL,ITOL,
      &              SOLOUT,IOUT,DEBUG,
@@ -58,21 +58,6 @@ C --- PRINTS SOLUTION AT EQUIDISTANT OUTPUT-POINTS BY USING "CONTD5"
         IMPLICIT REAL*8 (A-H,O-Z)
         DIMENSION Y(N),CON(5*ND),ICOMP(ND),RPAR(2)
         COMMON /INTERN/XOUT
-        IF (NR.EQ.1) THEN
-           WRITE (6,99) NR-1,X,Y(1),Y(2),Y(3),Y(4)
-           XOUT=X+1.0D0
-        ELSE
- 10        CONTINUE
-           IF (X.GE.XOUT) THEN
-              WRITE (6,99) NR-1,XOUT,CONTD5(1,XOUT,CON,ICOMP,ND),
-     &                     CONTD5(2,XOUT,CON,ICOMP,ND),
-     &                     CONTD5(3,XOUT,CON,ICOMP,ND),
-     &                     CONTD5(4,XOUT,CON,ICOMP,ND)
-              XOUT=XOUT+1.0D0
-              GOTO 10
-           END IF
-        END IF
- 99     FORMAT('step =',I4,', x =',F6.2,', y =',4ES23.15)
         RETURN
         END
 C

@@ -1,6 +1,6 @@
       SUBROUTINE DOPRI5(N,FCN,X,Y,XEND,
      &                  RTOL,ATOL,ITOL,
-     &                  SOLOUT,IOUT,
+     &                  SOLOUT,IOUT,DEBUG,
      &                  WORK,LWORK,IWORK,LIWORK,RPAR,IPAR,IDID)
 C ----------------------------------------------------------
 C     NUMERICAL SOLUTION OF A SYSTEM OF FIRST 0RDER
@@ -191,7 +191,7 @@ C *** *** *** *** *** *** *** *** *** *** *** *** ***
       IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       DIMENSION Y(N),ATOL(*),RTOL(*),WORK(LWORK),IWORK(LIWORK)
       DIMENSION RPAR(*),IPAR(*)
-      LOGICAL ARRET
+      LOGICAL ARRET,DEBUG
       EXTERNAL FCN,SOLOUT
 C *** *** *** *** *** *** ***
 C        SETTING THE PARAMETERS 
@@ -339,7 +339,7 @@ C -------- CALL TO CORE INTEGRATOR ------------
      &   SOLOUT,IOUT,IDID,NMAX,UROUND,METH,NSTIFF,SAFE,BETA,FAC1,FAC2,
      &   WORK(IEY1),WORK(IEK1),WORK(IEK2),WORK(IEK3),WORK(IEK4),
      &   WORK(IEK5),WORK(IEK6),WORK(IEYS),WORK(IECO),IWORK(ICOMP),
-     &   NRDENS,RPAR,IPAR,NFCN,NSTEP,NACCPT,NREJCT)
+     &   NRDENS,RPAR,IPAR,NFCN,NSTEP,NACCPT,NREJCT,DEBUG)
       WORK(7)=H
       IWORK(17)=NFCN
       IWORK(18)=NSTEP
@@ -356,7 +356,7 @@ C
       SUBROUTINE DOPCOR(N,FCN,X,Y,XEND,HMAX,H,RTOL,ATOL,ITOL,IPRINT,
      &   SOLOUT,IOUT,IDID,NMAX,UROUND,METH,NSTIFF,SAFE,BETA,FAC1,FAC2,
      &   Y1,K1,K2,K3,K4,K5,K6,YSTI,CONT,ICOMP,NRD,RPAR,IPAR,
-     &   NFCN,NSTEP,NACCPT,NREJCT)
+     &   NFCN,NSTEP,NACCPT,NREJCT,DEBUG)
 C ----------------------------------------------------------
 C     CORE INTEGRATOR FOR DOPRI5
 C     PARAMETERS SAME AS IN DOPRI5 WITH WORKSPACE ADDED 
@@ -367,7 +367,7 @@ C ----------------------------------------------------------
       DOUBLE PRECISION K1(N),K2(N),K3(N),K4(N),K5(N),K6(N)
       DIMENSION Y(N),Y1(N),YSTI(N),ATOL(*),RTOL(*),RPAR(*),IPAR(*)
       DIMENSION CONT(5*NRD),ICOMP(NRD)
-      LOGICAL REJECT,LAST 
+      LOGICAL REJECT,LAST,DEBUG
       EXTERNAL FCN
       COMMON /CONDO5/XOLD,HOUT
 C *** *** *** *** *** *** ***
@@ -507,6 +507,11 @@ C ------- STIFFNESS DETECTION
          DO 44 I=1,N
          K1(I)=K2(I)
   44     Y(I)=Y1(I)
+C ------- Dorival
+         IF (DEBUG) THEN
+            write(*,'(A,I5,A,es23.15,A,es23.15)')'accept: step = ',
+     &      NSTEP,', err =',ERR,', h_new =',HNEW
+         END IF
          XOLD=X
          X=XPH
          IF (IOUT.NE.0) THEN
