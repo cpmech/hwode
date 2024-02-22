@@ -43,6 +43,8 @@ C --- CALL OF THE SUBROUTINE DOPRI5
      &              SOLOUT,IOUT,DEBUG,
      &              WORK,LWORK,IWORK,LIWORK,RPAR,IPAR,IDID)
 C --- PRINT FINAL SOLUTION
+      write(*,'(A)',advance='no')'DoPri5: Dormand-Prince method '
+      write(*,'(A)')'(explicit, order 5(4), embedded)'
       write(*,'(A,I0)')'Number of function evaluations   = ',IWORK(17)
       write(*,'(A,I0)')'Number of performed steps        = ',IWORK(18)
       write(*,'(A,I0)')'Number of accepted steps         = ',IWORK(19)
