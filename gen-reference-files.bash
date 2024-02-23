@@ -19,5 +19,6 @@ cd examples
 ./radau5_amp        > "$RUSSELL/fortran_radau5_amplifier.txt"
 ./radau5_eq1_debug  > "$RUSSELL/fortran_radau5_hairer_wanner_eq1_debug.txt"
 ./radau5_eq1        > "$RUSSELL/fortran_radau5_hairer_wanner_eq1.txt"
+./radau5_rob        > "$RUSSELL/fortran_radau5_robertson.txt"
 ./radau5_vdp_debug  > "$RUSSELL/fortran_radau5_van_der_pol_debug.txt"
 ./radau5_vdp        > "$RUSSELL/fortran_radau5_van_der_pol.txt"

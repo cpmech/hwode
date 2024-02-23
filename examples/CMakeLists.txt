@@ -13,6 +13,7 @@ set(EXAMPLES
     radau5_amp
     radau5_eq1_debug
     radau5_eq1
+    radau5_rob
     radau5_vdp_debug
     radau5_vdp
 )
