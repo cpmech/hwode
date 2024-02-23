@@ -8,6 +8,7 @@ set(EXAMPLES
     dr3_radau5
     dr_dop853
     dr_dopri5_debug
+    dr_dopri5_eq1
     dr_dopri5
     dr_odex2
     dr_odex

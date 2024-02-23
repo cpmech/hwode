@@ -14,6 +14,8 @@ cd examples
 ./dr_dopri5_debug > "$RUSSELL/fortran_dopri5_arenstorf_debug.txt"
 ./dr_dopri5       > "$RUSSELL/fortran_dopri5_arenstorf.txt"
 
+./dr_dopri5_eq1   > "$RUSSELL/fortran_dopri5_hairer_wanner_eq1.txt"
+
 ./dr0_radau5_debug > "$RUSSELL/fortran_radau5_hairer_wanner_eq1_debug.txt"
 ./dr0_radau5       > "$RUSSELL/fortran_radau5_hairer_wanner_eq1.txt"
 
