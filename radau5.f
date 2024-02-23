@@ -1119,8 +1119,10 @@ C --- FAIL EXIT
       IDID=-4
       RETURN
  177  CONTINUE
-      WRITE(6,979)X   
-      WRITE(6,*) ' STEP SIZE T0O SMALL, H=',H
+C --- dorival
+C      WRITE(6,979)X   
+C      WRITE(6,*) ' STEP SIZE T0O SMALL, H=',H
+      write(6,'(A)')'ERROR: THE STEPSIZE BECOMES TOO SMALL'
       IDID=-3
       RETURN
  178  CONTINUE
