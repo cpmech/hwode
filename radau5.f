@@ -1060,8 +1060,9 @@ C       --- PREDICTIVE CONTROLLER OF GUSTAFSSON
          END IF
          CALJAC=.FALSE.
          IF (LAST) THEN
-C --- Dorival: Returning the last accepted stepsize, not the min(h_prev, h)
-C           H=HOPT
+C --- Dorival: Returning the last accepted stepsize
+C            H=HOPT
+            H=HNEW
             IDID=1
             RETURN
          END IF
