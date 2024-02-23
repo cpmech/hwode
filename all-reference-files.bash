@@ -11,6 +11,8 @@ RUSSELL="/home/dorival/01-Code/rust/russell/russell_ode/data"
 
 cd examples
 
+./dr_dop853       > "$RUSSELL/fortran_dop853_van_der_pol.txt"
+
 ./dr_dopri5_debug > "$RUSSELL/fortran_dopri5_arenstorf_debug.txt"
 ./dr_dopri5       > "$RUSSELL/fortran_dopri5_arenstorf.txt"
 

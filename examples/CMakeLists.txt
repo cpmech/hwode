@@ -5,7 +5,6 @@ set(EXAMPLES
     dr1_radau5
     dr2_radau5_debug
     dr2_radau5
-    dr3_radau5
     dr_dop853
     dr_dopri5_debug
     dr_dopri5_eq1
