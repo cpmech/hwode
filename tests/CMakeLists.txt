@@ -14,14 +14,14 @@ set(TESTS
 )
 
 foreach(var ${TESTS})
-    set(bin "${var}-radau5")
+    set(bin "${var}_radau5")
     add_executable       (${bin} "${var}_equation.f" "${var}_radau5.f")
     target_link_libraries(${bin} ${LIBS})
     set_target_properties(${bin} PROPERTIES COMPILE_FLAGS "${FLAGS}" LINK_FLAGS "${LFLAGS}")
 endforeach(var)
 
 foreach(var ${TESTS})
-    set(bin "${var}-seulex")
+    set(bin "${var}_seulex")
     add_executable       (${bin} "${var}_equation.f" "${var}_seulex.f")
     target_link_libraries(${bin} ${LIBS})
     set_target_properties(${bin} PROPERTIES COMPILE_FLAGS "${FLAGS}" LINK_FLAGS "${LFLAGS}")
