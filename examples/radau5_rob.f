@@ -25,10 +25,10 @@ C --- INITIAL VALUES
         Y(2)=0.0D0
         Y(3)=0.0D0
 C --- ENDPOINT OF INTEGRATION
-        XEND=1.0D0
-C --- REQUIRED TOLERANCE
-        RTOL=1.0D-4
-        ATOL=RTOL
+        XEND=0.3D0
+C --- REQUIRED TOLERANCE (ATOL must be must smaller)
+        RTOL=1.0D-2
+        ATOL=(1.0D-6)*RTOL
         ITOL=0
 C --- INITIAL STEP SIZE
         H=1.0D-6
@@ -65,24 +65,10 @@ C --- PRINT FINAL SOLUTION
 C
 C
         SUBROUTINE SOLOUT (NR,XOLD,X,Y,CONT,LRC,N,RPAR,IPAR,IRTRN)
-C --- PRINTS SOLUTION AT EQUIDISTANT OUTPUT-POINTS BY USING "CONTR5"
         IMPLICIT REAL*8 (A-H,O-Z)
         DIMENSION Y(N),CONT(LRC)
         COMMON /INTERN/XOUT
-        IF (NR.EQ.1) THEN
-           WRITE (6,99) NR-1,X,Y(1),Y(2),Y(3)
-           XOUT=0.1D0
-        ELSE
- 10        CONTINUE
-           IF (X.GE.XOUT) THEN
-C --- CONTINUOUS OUTPUT FOR RADAU5
-              WRITE (6,99) NR-1,XOUT,CONTR5(1,XOUT,CONT,LRC),
-     &                     CONTR5(2,XOUT,CONT,LRC),
-     &                     CONTR5(3,XOUT,CONT,LRC)
-              XOUT=XOUT+0.1D0
-              GOTO 10
-           END IF
-        END IF
+        WRITE (6,99) NR-1,X,Y(1),Y(2),Y(3)
  99     FORMAT('step =',I4,', x =',F5.2,', y =',3ES23.15)
         RETURN
         END
