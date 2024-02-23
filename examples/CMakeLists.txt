@@ -3,6 +3,7 @@ set(EXAMPLES
     dopri5_aren_debug
     dopri5_aren
     dopri5_eq1
+    dopri5_rob
     dr_odex
     dr_odex2
     dr_radau
