@@ -29,19 +29,24 @@ C --- DEFAULT VALUES FOR PARAMETERS
   10    WORK(I)=0.D0   
         IWORK(5)=N
         IWORK(4)=1
+C --- DORIVAL: INITIAL STEPSIZE
+        WORK(7)=1.0D-6
 C --- CALL OF THE SUBROUTINE DOPRI8   
+        write(*,'(A)')''
+        write(*,'(A)')'running dop853.f test'
         CALL DOP853(N,FVPOL,X,Y,XEND,
      &                  RTOL,ATOL,ITOL,
      &                  SOLOUT,IOUT,
      &                  WORK,LWORK,IWORK,LIWORK,RPAR,IPAR,IDID)
 C --- PRINT FINAL SOLUTION
-        WRITE (6,99) X,Y(1),Y(2)
- 99     FORMAT(1X,'X =',F5.2,'    Y =',2E18.10)
-C --- PRINT STATISTICS
-        WRITE (6,90) TOL
- 90     FORMAT('       tol=',D8.2)
-        WRITE (6,91) (IWORK(J),J=17,20)
- 91     FORMAT(' fcn=',I5,' step=',I4,' accpt=',I4,' rejct=',I3)
+      write(*,'(A)',advance='no')'DoPri8: Dormand-Prince method '
+      write(*,'(A)')'(explicit, order 8(5,3), embedded)'
+      write(*,'(A,I0)')'Number of function evaluations   = ',IWORK(17)
+      write(*,'(A,I0)')'Number of performed steps        = ',IWORK(18)
+      write(*,'(A,I0)')'Number of accepted steps         = ',IWORK(19)
+      write(*,'(A,I0)')'Number of rejected steps         = ',IWORK(20)
+      write(*,'(A,ES23.15,ES23.15)')'y =',Y(1),Y(2)
+      write(*,'(A,ES23.15)')'h =',WORK(7)
         STOP
         END
 C
@@ -52,18 +57,18 @@ C --- BY USING "CONTD8", THE CONTINUOUS COLLOCATION SOLUTION
         DIMENSION Y(N),CON(8*ND),ICOMP(ND)
         COMMON /INTERN/XOUT
         IF (NR.EQ.1) THEN
-           WRITE (6,99) X,Y(1),Y(2),NR-1
+           WRITE (6,99) NR-1,X,Y(1),Y(2)
            XOUT=X+0.1D0
         ELSE
  10        CONTINUE
            IF (X.GE.XOUT) THEN
-              WRITE (6,99) XOUT,CONTD8(1,XOUT,CON,ICOMP,ND),
-     &                     CONTD8(2,XOUT,CON,ICOMP,ND),NR-1
+              WRITE (6,99) NR-1,XOUT,CONTD8(1,XOUT,CON,ICOMP,ND),
+     &                     CONTD8(2,XOUT,CON,ICOMP,ND)
               XOUT=XOUT+0.1D0
               GOTO 10
            END IF
         END IF
- 99     FORMAT(1X,'X =',F5.2,'    Y =',2E18.10,'    NSTEP =',I4)
+ 99     FORMAT('step =',I4,', x =',F5.2,', y =',2ES23.15)
         RETURN
         END
 C
