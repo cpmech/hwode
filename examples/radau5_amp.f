@@ -98,8 +98,9 @@ C --- PRINT FINAL SOLUTION
       write(*,'(A,I0)')'Number of accepted steps         = ',IWORK(17)
       write(*,'(A,I0)')'Number of rejected steps         = ',IWORK(18)
       write(*,'(A,I0)')'Number of iterations (maximum)   = ',IWORK(21)
-      write(*,'(A,ES23.15,A,ES23.15)',advance='no')'y =',Y(1),',',Y(2)
-      write(*,'(A,ES23.15,A,ES23.15)')',',Y(3),',',Y(4)
+      write(*,'(A,4ES23.15)')'y1to4 =',Y(1),Y(2),Y(3),Y(4)
+      write(*,'(A,4ES23.15)')'y5to8 =',Y(5),Y(6),Y(7),Y(8)
+      write(*,'(A,ES23.15)')'h =',H
         STOP
         END
 C
@@ -111,19 +112,21 @@ C --- BY USING "CONTR5"
         DIMENSION Y(N),CONT(LRC)
         COMMON /INTERN/XOUT
         IF (NR.EQ.1) THEN
-           WRITE (6,99) X,Y(1),Y(2),NR-1
+           WRITE (6,99) NR-1,X,Y(1),Y(2),Y(3),Y(4)
            XOUT=0.0025D0
         ELSE
  10        CONTINUE
            IF (X.GE.XOUT) THEN
 C --- CONTINUOUS OUTPUT FOR RADAU5
-              WRITE (6,99) XOUT,CONTR5(1,XOUT,CONT,LRC),
-     &                     CONTR5(2,XOUT,CONT,LRC),NR-1
+              WRITE (6,99) NR-1,XOUT,CONTR5(1,XOUT,CONT,LRC),
+     &                     CONTR5(2,XOUT,CONT,LRC),
+     &                     CONTR5(3,XOUT,CONT,LRC),
+     &                     CONTR5(4,XOUT,CONT,LRC)
               XOUT=XOUT+0.0025D0
               GOTO 10
            END IF
         END IF
- 99     FORMAT(1X,'X =',F7.4,'    Y =',2E18.10,'    NSTEP =',I4)
+ 99     FORMAT('step =',I4,', x =',F7.4,', y =',4ES23.15)
         RETURN
         END
 C
