@@ -98,8 +98,9 @@ C --- PRINT FINAL SOLUTION
       write(*,'(A,I0)')'Number of accepted steps         = ',IWORK(17)
       write(*,'(A,I0)')'Number of rejected steps         = ',IWORK(18)
       write(*,'(A,I0)')'Number of iterations (maximum)   = ',IWORK(21)
-      write(*,'(A,ES23.15,A,ES23.15)',advance='no')'y =',Y(1),',',Y(2)
-      write(*,'(A,ES23.15,A,ES23.15)')',',Y(3),',',Y(4)
+      write(*,'(A,4ES23.15)')'y1to4 =',Y(1),Y(2),Y(3),Y(4)
+      write(*,'(A,4ES23.15)')'y5to8 =',Y(5),Y(6),Y(7),Y(8)
+      write(*,'(A,ES23.15)')'h =',H
         STOP
         END
 C
