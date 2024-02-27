@@ -4,6 +4,7 @@ set(EXAMPLES
     dopri5_aren
     dopri5_eq1
     dopri5_rob
+    dopri5_vdp_rho
     dr_odex
     dr_odex2
     dr_radau
