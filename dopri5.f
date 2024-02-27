@@ -478,13 +478,20 @@ C ------- STIFFNESS DETECTION
                STNUM=STNUM+(K2(I)-K6(I))**2
                STDEN=STDEN+(Y1(I)-YSTI(I))**2
  64         CONTINUE  
-            IF (STDEN.GT.0.D0) HLAMB=H*SQRT(STNUM/STDEN) 
+C dorival   IF (STDEN.GT.0.D0) HLAMB=H*SQRT(STNUM/STDEN) 
+            IF (STDEN.GT.UROUND) HLAMB=H*SQRT(STNUM/STDEN) 
+C ---------- Dorival
+            IF (DEBUG) THEN
+               write(*,'(A,ES23.15)')'h times lambda =',HLAMB
+            END IF
+C ---------- Dorival
             IF (HLAMB.GT.3.25D0) THEN
                NONSTI=0
                IASTI=IASTI+1  
                IF (IASTI.EQ.15) THEN
-                  IF (IPRINT.GT.0) WRITE (IPRINT,*) 
-     &               ' THE PROBLEM SEEMS TO BECOME STIFF AT X = ',X   
+                  IF (IPRINT.GT.0) WRITE (IPRINT,'(A,ES23.15,A,I5)') 
+     &               ' THE PROBLEM SEEMS TO BECOME STIFF AT X = ',X,
+     &               ', ACCEPTED STEP = ',NACCPT
                   IF (IPRINT.LE.0) GOTO 76
                END IF
             ELSE

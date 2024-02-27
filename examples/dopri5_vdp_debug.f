@@ -1,5 +1,5 @@
 C * * * * * * * * * * * * * * * * * * * * * * * * *
-C --- DRIVER FOR DOPRI5 ON VAN DER POL EQUATION (STIFFNESS DETECTION: RHO)
+C --- DRIVER FOR DOPRI5 ON VAN DER POL EQUATION
 C * * * * * * * * * * * * * * * * * * * * * * * * *
         IMPLICIT REAL*8 (A-H,O-Z)
         PARAMETER (NDGL=2,NRDENS=2)
@@ -19,7 +19,7 @@ C --- INITIAL VALUES AND ENDPOINT OF INTEGRATION
         XEND=2.0D0
 C --- REQUIRED (RELATIVE AND ABSOLUTE) TOLERANCE
         ITOL=0
-        RTOL=1.0D-7
+        RTOL=1.0D-3
         ATOL=RTOL
 C --- DEFAULT VALUES FOR PARAMETERS
         DO 10 I=1,20
@@ -27,7 +27,7 @@ C --- DEFAULT VALUES FOR PARAMETERS
   10    WORK(I)=0.D0  
 C --- INITIAL STEPSIZE
         WORK(7)=1.0D-4
-C --- Stiffness Detection
+C --- Stiffness Detection all the time
         IWORK(4)=1
 C --- CALL OF THE SUBROUTINE DOPRI5   
         write(*,'(A)')''

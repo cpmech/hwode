@@ -29,6 +29,7 @@ C --- DEFAULT VALUES FOR PARAMETERS
         IWORK(I)=0
   10    WORK(I)=0.D0   
         IWORK(5)=N
+C --- Dorival: enable stiffness detection "all the time"
         IWORK(4)=1
 C --- DORIVAL: INITIAL STEPSIZE
         WORK(7)=1.0D-6
