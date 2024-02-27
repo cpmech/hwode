@@ -1,4 +1,5 @@
 set(EXAMPLES
+    dop853_vdp_debug
     dop853_vdp
     dopri5_aren_debug
     dopri5_aren

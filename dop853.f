@@ -1,6 +1,6 @@
       SUBROUTINE DOP853(N,FCN,X,Y,XEND,
      &                  RTOL,ATOL,ITOL,
-     &                  SOLOUT,IOUT,
+     &                  SOLOUT,IOUT,DEBUG,
      &                  WORK,LWORK,IWORK,LIWORK,RPAR,IPAR,IDID)
 C ----------------------------------------------------------
 C     NUMERICAL SOLUTION OF A SYSTEM OF FIRST 0RDER
@@ -190,7 +190,7 @@ C *** *** *** *** *** *** *** *** *** *** *** *** ***
       IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       DIMENSION Y(N),ATOL(*),RTOL(*),WORK(LWORK),IWORK(LIWORK)
       DIMENSION RPAR(*),IPAR(*)
-      LOGICAL ARRET
+      LOGICAL ARRET,DEBUG
       EXTERNAL FCN,SOLOUT
 C *** *** *** *** *** *** ***
 C        SETTING THE PARAMETERS 
@@ -343,7 +343,7 @@ C -------- CALL TO CORE INTEGRATOR ------------
      &   WORK(IEK1),WORK(IEK2),WORK(IEK3),WORK(IEK4),WORK(IEK5),
      &   WORK(IEK6),WORK(IEK7),WORK(IEK8),WORK(IEK9),WORK(IEK10),
      &   WORK(IEY1),WORK(IECO),IWORK(ICOMP),NRDENS,RPAR,IPAR,
-     &   NFCN,NSTEP,NACCPT,NREJCT)
+     &   NFCN,NSTEP,NACCPT,NREJCT,DEBUG)
       WORK(7)=H
       IWORK(17)=NFCN
       IWORK(18)=NSTEP
@@ -360,7 +360,7 @@ C
       SUBROUTINE DP86CO(N,FCN,X,Y,XEND,HMAX,H,RTOL,ATOL,ITOL,IPRINT,
      &   SOLOUT,IOUT,IDID,NMAX,UROUND,METH,NSTIFF,SAFE,BETA,FAC1,FAC2,
      &   K1,K2,K3,K4,K5,K6,K7,K8,K9,K10,Y1,CONT,ICOMP,NRD,RPAR,IPAR,
-     &   NFCN,NSTEP,NACCPT,NREJCT)
+     &   NFCN,NSTEP,NACCPT,NREJCT,DEBUG)
 C ----------------------------------------------------------
 C     CORE INTEGRATOR FOR DOP853
 C     PARAMETERS SAME AS IN DOP853 WITH WORKSPACE ADDED 
@@ -538,7 +538,7 @@ C ----------------------------------------------------------
       DOUBLE PRECISION Y(N),Y1(N),K1(N),K2(N),K3(N),K4(N),K5(N),K6(N)
       DOUBLE PRECISION K7(N),K8(N),K9(N),K10(N),ATOL(*),RTOL(*)     
       DIMENSION CONT(8*NRD),ICOMP(NRD),RPAR(*),IPAR(*)
-      LOGICAL REJECT,LAST 
+      LOGICAL REJECT,LAST,DEBUG 
       EXTERNAL FCN
       COMMON /CONDO8/XOLD,HOUT
 C *** *** *** *** *** *** ***
@@ -738,6 +738,12 @@ C ---     FINAL PREPARATION
          DO 67 I=1,N
          K1(I)=K4(I)
   67     Y(I)=K5(I)
+C ------- Dorival -- start
+         IF (DEBUG) THEN
+            write(*,'(A,I5,A,es23.15,A,es23.15)')'accept: step = ',
+     &      NSTEP,', err =',ERR,', h_new =',HNEW
+         END IF
+C ------- Dorival -- end
          XOLD=X
          X=XPH
          IF (IOUT.GE.1) THEN
@@ -760,6 +766,12 @@ C --- STEP IS REJECTED
          REJECT=.TRUE.  
          IF(NACCPT.GE.1)NREJCT=NREJCT+1   
          LAST=.FALSE.
+C ------- Dorival -- start
+         IF (DEBUG) THEN
+            write(*,'(A,I5,A,es23.15,A,es23.15)')'reject: step = ',
+     &      NSTEP,', err =',ERR,', h_new =',HNEW
+         END IF
+C ------- Dorival -- end
       END IF
       H=HNEW
       GOTO 1
