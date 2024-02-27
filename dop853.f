@@ -720,7 +720,13 @@ C ---     THE NEXT THREE FUNCTION EVALUATIONS
      &            +A168*K8(I)+A169*K9(I)+A1613*K4(I)+A1614*K10(I)
      &            +A1615*K2(I))
             CALL FCN(N,X+C16*H,Y1,K3,RPAR,IPAR)
+C --- Dorival (disable counting extra function calls if debugging)
+            IF (.NOT.DEBUG) THEN
+C --- Dorival
             NFCN=NFCN+3 
+C --- Dorival
+            END IF
+C --- Dorival
 C ---     FINAL PREPARATION
             DO 63 J=1,NRD
                I=ICOMP(J)
