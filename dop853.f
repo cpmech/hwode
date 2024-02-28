@@ -555,6 +555,7 @@ C --- INITIAL PREPARATIONS
       LAST=.FALSE. 
       HLAMB=0.D0
       IASTI=0
+      NONSTI=0
       CALL FCN(N,X,Y,K1,RPAR,IPAR)
       HMAX=ABS(HMAX)     
       IORD=8  
@@ -672,18 +673,13 @@ C ------- STIFFNESS DETECTION
  64         CONTINUE  
 C dorival    IF (STDEN.GT.0.D0) HLAMB=ABS(H)*SQRT(STNUM/STDEN) 
             IF (STDEN.GT.UROUND) HLAMB=ABS(H)*SQRT(STNUM/STDEN) 
-C ---------- Dorival
-            IF (DEBUG) THEN
-               write(*,'(A,ES23.15)')'h times lambda =',HLAMB
-            END IF
-C ---------- Dorival
             IF (HLAMB.GT.6.1D0) THEN
                NONSTI=0
                IASTI=IASTI+1  
                IF (IASTI.EQ.15) THEN
                   IF (IPRINT.GT.0) WRITE (IPRINT,'(A,ES23.15,A,I5)') 
-     &               ' THE PROBLEM SEEMS TO BECOME STIFF AT X = ',X,
-     &               ', ACCEPTED STEP = ',NACCPT
+     &               'THE PROBLEM SEEMS TO BECOME STIFF AT X =',X,
+     &               ', ACCEPTED STEP =',NACCPT
                   IF (IPRINT.LE.0) GOTO 76
                END IF
             ELSE
@@ -753,9 +749,10 @@ C ---     FINAL PREPARATION
   67     Y(I)=K5(I)
 C ------- Dorival -- start
          IF (DEBUG) THEN
-            write(*,'(A,I5,A,es23.15,A,es23.15)')'accept: step = ',
-     &      NSTEP,', err =',ERR,', h_new =',HNEW
+            write(*,444)NSTEP,ERR,HNEW,IASTI,NONSTI,HLAMB
          END IF
+  444 FORMAT('step(A) =',I5,', err =',ES23.15,', h_new =',ES23.15,
+     & ', n_yes =',I4,', n_no =',I4,', h*lambda =',ES23.15)
 C ------- Dorival -- end
          XOLD=X
          X=XPH
@@ -781,9 +778,9 @@ C --- STEP IS REJECTED
          LAST=.FALSE.
 C ------- Dorival -- start
          IF (DEBUG) THEN
-            write(*,'(A,I5,A,es23.15,A,es23.15)')'reject: step = ',
-     &      NSTEP,', err =',ERR,', h_new =',HNEW
+            write(*,445)NSTEP,ERR,HNEW
          END IF
+  445 FORMAT('step(R) =',I5,', err =',ES23.15,', h_new =',ES23.15)
 C ------- Dorival -- end
       END IF
       H=HNEW

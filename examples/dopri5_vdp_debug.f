@@ -32,7 +32,7 @@ C --- Stiffness Detection all the time
 C --- CALL OF THE SUBROUTINE DOPRI5   
         write(*,'(A)')''
         write(*,'(A)')'running dopri5.f test'
-        DEBUG=.FALSE.
+        DEBUG=.TRUE.
         CALL DOPRI5(N,FVPOL,X,Y,XEND,
      &              RTOL,ATOL,ITOL,
      &              SOLOUT,IOUT,DEBUG,

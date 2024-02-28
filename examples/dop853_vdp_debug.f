@@ -10,7 +10,7 @@ cfeh dr_dop853 dop853
         LOGICAL DEBUG
 C --- DIMENSION OF THE SYSTEM
         N=2
-        RPAR=1.0D-3
+        RPAR=0.003D0
 C --- OUTPUT ROUTINE (AND DENSE OUTPUT) IS USED DURING INTEGRATION
         IOUT=2
 C --- INITIAL VALUES
@@ -20,10 +20,9 @@ C --- INITIAL VALUES
 C --- ENDPOINT OF INTEGRATION
         XEND=2.0D0
 C --- REQUIRED (RELATIVE) TOLERANCE
-        TOL=1.0D-9
         ITOL=0
-        RTOL=TOL
-        ATOL=TOL
+        RTOL=1.0D-3
+        ATOL=RTOL
 C --- DEFAULT VALUES FOR PARAMETERS
         DO 10 I=1,10
         IWORK(I)=0
@@ -32,7 +31,7 @@ C --- DEFAULT VALUES FOR PARAMETERS
 C --- Dorival: enable stiffness detection "all the time"
         IWORK(4)=1
 C --- DORIVAL: INITIAL STEPSIZE
-        WORK(7)=1.0D-6
+        WORK(7)=1.0D-4
 C --- CALL OF THE SUBROUTINE DOPRI8   
         write(*,'(A)')''
         write(*,'(A)')'running dop853.f test'
