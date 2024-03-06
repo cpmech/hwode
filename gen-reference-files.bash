@@ -19,8 +19,6 @@ cd examples
 ./dopri5_rob         > "$RUSSELL/fortran_dopri5_robertson.txt"
 ./dopri5_vdp_debug   > "$RUSSELL/fortran_dopri5_van_der_pol_debug.txt"
 ./radau5_amp1t       > "$RUSSELL/fortran_radau5_amplifier1t.txt"
-./radau5_amp2t_debug > "$RUSSELL/fortran_radau5_amplifier2t_debug.txt"
-./radau5_amp2t       > "$RUSSELL/fortran_radau5_amplifier2t.txt"
 ./radau5_eq1_debug   > "$RUSSELL/fortran_radau5_hairer_wanner_eq1_debug.txt"
 ./radau5_eq1         > "$RUSSELL/fortran_radau5_hairer_wanner_eq1.txt"
 ./radau5_rob_debug   > "$RUSSELL/fortran_radau5_robertson_debug.txt"
