@@ -10,7 +10,7 @@ C --- DECLARATIONS
         EXTERNAL FAMPL,JBAMPL,BBAMPL,SOLOUT
         LOGICAL DEBUG
 C --- DATA FOR THE PROBLEM
-        UE=0.1D0
+        UE=0.4D0
           RPAR(1)=UE
         UB=6.0D0
           RPAR(2)=UB
@@ -48,7 +48,7 @@ C --- ENDPOINT OF INTEGRATION
         XEND=0.05D0
 C --- REQUIRED TOLERANCE
         RTOL=1.0D-4
-        ATOL=1.0D-9
+        ATOL=1.0D-4
         ITOL=0
 C --- INITIAL STEP SIZE
         H=1.0D-6 
@@ -103,7 +103,7 @@ C --- CONTINUOUS OUTPUT FOR RADAU5
               GOTO 10
            END IF
         END IF
- 99     FORMAT('step =',I4,', x =',F7.4,', y =',2ES23.15)
+ 99     FORMAT('step =',I4,', x =',F7.4,', y1and5 =',2ES23.15)
         RETURN
         END
 C
