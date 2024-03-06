@@ -12,8 +12,8 @@ set(EXAMPLES
     dr_retard
     dr_rodas
     dr_seulex
-    radau5_amp_debug
-    radau5_amp
+    radau5_amp2t_debug
+    radau5_amp2t
     radau5_eq1_debug
     radau5_eq1
     radau5_rob
