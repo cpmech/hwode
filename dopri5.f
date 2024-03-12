@@ -397,6 +397,8 @@ C --- INITIAL PREPARATIONS
       NFCN=NFCN+2
       REJECT=.FALSE.
       XOLD=X
+C --- dorival
+      XSTIFF1=XEND
       IF (IOUT.NE.0) THEN 
           IRTRN=1
           HOUT=H
@@ -482,17 +484,21 @@ C ------- STIFFNESS DETECTION
 C dorival   IF (STDEN.GT.0.D0) HLAMB=H*SQRT(STNUM/STDEN) 
             IF (STDEN.GT.UROUND) HLAMB=H*SQRT(STNUM/STDEN) 
             IF (HLAMB.GT.3.25D0) THEN
+               XSTIFF1=MIN(X,XSTIFF1)
                NONSTI=0
                IASTI=IASTI+1  
                IF (IASTI.EQ.15) THEN
                   IF (IPRINT.GT.0) WRITE (IPRINT,'(A,ES23.15,A,I5)') 
-     &               'THE PROBLEM SEEMS TO BECOME STIFF AT X =',X,
+     &               'THE PROBLEM SEEMS TO BECOME STIFF AT X =',XSTIFF1,
      &               ', ACCEPTED STEP =',NACCPT
                   IF (IPRINT.LE.0) GOTO 76
                END IF
             ELSE
                NONSTI=NONSTI+1  
-               IF (NONSTI.EQ.6) IASTI=0
+               IF (NONSTI.EQ.6) THEN
+                  XSTIFF1=XEND
+                  IASTI=0
+               END IF
             END IF
          END IF 
          IF (IOUT.GE.2) THEN 
