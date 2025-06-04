@@ -1,15 +1,27 @@
 set(EXAMPLES
-    dr0_radau5
-    dr1_radau5
-    dr2_radau5
-    dr_dop853
-    dr_dopri5
-    dr_odex2
+    dop853_vdp_debug
+    dop853_vdp
+    dopri5_aren_debug
+    dopri5_aren
+    dopri5_eq1
+    dopri5_rob
+    dopri5_vdp_debug
     dr_odex
+    dr_odex2
     dr_radau
     dr_retard
     dr_rodas
+    dr_sdirk4
     dr_seulex
+    radau5_amp1t
+    radau5_bruss_2d
+    radau5_eq1_debug
+    radau5_eq1
+    radau5_rob
+    radau5_rob_debug
+    radau5_rob_small_h
+    radau5_vdp_debug
+    radau5_vdp
 )
 
 foreach(var ${EXAMPLES})

@@ -8,6 +8,7 @@ C --- PARAMETERS FOR RADAU5 (FULL JACOBIAN)
         PARAMETER (ND=2,LWORK=4*ND*ND+12*ND+20,LIWORK=3*ND+20)
         DIMENSION Y(ND),WORK(LWORK),IWORK(LIWORK)
         EXTERNAL FVPOL,JVPOL,SOLOUT
+        LOGICAL DEBUG
 C --- PARAMETER IN THE DIFFERENTIAL EQUATION
         RPAR=1.0D-6
 C --- DIMENSION OF THE SYSTEM
@@ -23,7 +24,7 @@ C --- OUTPUT ROUTINE IS USED DURING INTEGRATION
 C --- INITIAL VALUES
         X=0.0D0
         Y(1)=2.0D0
-        Y(2)=-0.66D0
+        Y(2)=-0.6D0
 C --- ENDPOINT OF INTEGRATION
         XEND=2.0D0
 C --- REQUIRED TOLERANCE
@@ -38,21 +39,28 @@ C --- SET DEFAULT VALUES
            WORK(I)=0.D0
         END DO
 C --- CALL OF THE SUBROUTINE RADAU5
+        write(*,'(A)')''
+        write(*,'(A)')'running radau5.f test'
+        DEBUG=.FALSE.
         CALL RADAU5(N,FVPOL,X,Y,XEND,H,
      &                  RTOL,ATOL,ITOL,
      &                  JVPOL,IJAC,MLJAC,MUJAC,
      &                  FVPOL,IMAS,MLMAS,MUMAS,
-     &                  SOLOUT,IOUT,
+     &                  SOLOUT,IOUT,DEBUG,
      &                  WORK,LWORK,IWORK,LIWORK,RPAR,IPAR,IDID)
 C --- PRINT FINAL SOLUTION
-        WRITE (6,99) X,Y(1),Y(2)
- 99     FORMAT(1X,'X =',F5.2,'    Y =',2E18.10)
-C --- PRINT STATISTICS
-        WRITE (6,90) RTOL
- 90     FORMAT('       rtol=',D8.2)
-        WRITE (6,91) (IWORK(J),J=14,20)
- 91     FORMAT(' fcn=',I5,' jac=',I4,' step=',I4,' accpt=',I4,
-     &        ' rejct=',I3,' dec=',I4,' sol=',I5)
+      write(*,'(A)',advance='no')'Radau5: Radau method (Radau IIA) '
+      write(*,'(A)')'(implicit, order 5, embedded)'
+      write(*,'(A,I0)')'Number of function evaluations   = ',1+IWORK(14)
+      write(*,'(A,I0)')'Number of Jacobian evaluations   = ',IWORK(15)
+      write(*,'(A,I0)')'Number of factorizations         = ',IWORK(19)
+      write(*,'(A,I0)')'Number of lin sys solutions      = ',IWORK(20)
+      write(*,'(A,I0)')'Number of performed steps        = ',IWORK(16)
+      write(*,'(A,I0)')'Number of accepted steps         = ',IWORK(17)
+      write(*,'(A,I0)')'Number of rejected steps         = ',IWORK(18)
+      write(*,'(A,I0)')'Number of iterations (maximum)   = ',IWORK(21)
+      write(*,'(A,ES23.15,ES23.15)')'y =',Y(1),Y(2)
+      write(*,'(A,ES23.15)')'h =',H
         STOP
         END
 C
@@ -63,19 +71,19 @@ C --- PRINTS SOLUTION AT EQUIDISTANT OUTPUT-POINTS BY USING "CONTR5"
         DIMENSION Y(N),CONT(LRC)
         COMMON /INTERN/XOUT
         IF (NR.EQ.1) THEN
-           WRITE (6,99) X,Y(1),Y(2),NR-1
+           WRITE (6,99) NR-1,X,Y(1),Y(2)
            XOUT=0.2D0
         ELSE
  10        CONTINUE
            IF (X.GE.XOUT) THEN
 C --- CONTINUOUS OUTPUT FOR RADAU5
-              WRITE (6,99) XOUT,CONTR5(1,XOUT,CONT,LRC),
-     &                     CONTR5(2,XOUT,CONT,LRC),NR-1
+              WRITE (6,99) NR-1,XOUT,CONTR5(1,XOUT,CONT,LRC),
+     &                     CONTR5(2,XOUT,CONT,LRC)
               XOUT=XOUT+0.2D0
               GOTO 10
            END IF
         END IF
- 99     FORMAT(1X,'X =',F5.2,'    Y =',2E18.10,'    NSTEP =',I4)
+ 99     FORMAT('step =',I4,', x =',F5.2,', y =',2ES23.15)
         RETURN
         END
 C

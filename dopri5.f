@@ -1,6 +1,6 @@
       SUBROUTINE DOPRI5(N,FCN,X,Y,XEND,
      &                  RTOL,ATOL,ITOL,
-     &                  SOLOUT,IOUT,
+     &                  SOLOUT,IOUT,DEBUG,
      &                  WORK,LWORK,IWORK,LIWORK,RPAR,IPAR,IDID)
 C ----------------------------------------------------------
 C     NUMERICAL SOLUTION OF A SYSTEM OF FIRST 0RDER
@@ -191,7 +191,7 @@ C *** *** *** *** *** *** *** *** *** *** *** *** ***
       IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       DIMENSION Y(N),ATOL(*),RTOL(*),WORK(LWORK),IWORK(LIWORK)
       DIMENSION RPAR(*),IPAR(*)
-      LOGICAL ARRET
+      LOGICAL ARRET,DEBUG
       EXTERNAL FCN,SOLOUT
 C *** *** *** *** *** *** ***
 C        SETTING THE PARAMETERS 
@@ -339,7 +339,7 @@ C -------- CALL TO CORE INTEGRATOR ------------
      &   SOLOUT,IOUT,IDID,NMAX,UROUND,METH,NSTIFF,SAFE,BETA,FAC1,FAC2,
      &   WORK(IEY1),WORK(IEK1),WORK(IEK2),WORK(IEK3),WORK(IEK4),
      &   WORK(IEK5),WORK(IEK6),WORK(IEYS),WORK(IECO),IWORK(ICOMP),
-     &   NRDENS,RPAR,IPAR,NFCN,NSTEP,NACCPT,NREJCT)
+     &   NRDENS,RPAR,IPAR,NFCN,NSTEP,NACCPT,NREJCT,DEBUG)
       WORK(7)=H
       IWORK(17)=NFCN
       IWORK(18)=NSTEP
@@ -356,7 +356,7 @@ C
       SUBROUTINE DOPCOR(N,FCN,X,Y,XEND,HMAX,H,RTOL,ATOL,ITOL,IPRINT,
      &   SOLOUT,IOUT,IDID,NMAX,UROUND,METH,NSTIFF,SAFE,BETA,FAC1,FAC2,
      &   Y1,K1,K2,K3,K4,K5,K6,YSTI,CONT,ICOMP,NRD,RPAR,IPAR,
-     &   NFCN,NSTEP,NACCPT,NREJCT)
+     &   NFCN,NSTEP,NACCPT,NREJCT,DEBUG)
 C ----------------------------------------------------------
 C     CORE INTEGRATOR FOR DOPRI5
 C     PARAMETERS SAME AS IN DOPRI5 WITH WORKSPACE ADDED 
@@ -367,7 +367,7 @@ C ----------------------------------------------------------
       DOUBLE PRECISION K1(N),K2(N),K3(N),K4(N),K5(N),K6(N)
       DIMENSION Y(N),Y1(N),YSTI(N),ATOL(*),RTOL(*),RPAR(*),IPAR(*)
       DIMENSION CONT(5*NRD),ICOMP(NRD)
-      LOGICAL REJECT,LAST 
+      LOGICAL REJECT,LAST,DEBUG
       EXTERNAL FCN
       COMMON /CONDO5/XOLD,HOUT
 C *** *** *** *** *** *** ***
@@ -388,6 +388,7 @@ C --- INITIAL PREPARATIONS
       LAST=.FALSE. 
       HLAMB=0.D0
       IASTI=0
+      NONSTI=0
       CALL FCN(N,X,Y,K1,RPAR,IPAR)
       HMAX=ABS(HMAX)     
       IORD=5  
@@ -396,6 +397,8 @@ C --- INITIAL PREPARATIONS
       NFCN=NFCN+2
       REJECT=.FALSE.
       XOLD=X
+C --- dorival
+      XSTIFF1=XEND
       IF (IOUT.NE.0) THEN 
           IRTRN=1
           HOUT=H
@@ -478,18 +481,24 @@ C ------- STIFFNESS DETECTION
                STNUM=STNUM+(K2(I)-K6(I))**2
                STDEN=STDEN+(Y1(I)-YSTI(I))**2
  64         CONTINUE  
-            IF (STDEN.GT.0.D0) HLAMB=H*SQRT(STNUM/STDEN) 
+C dorival   IF (STDEN.GT.0.D0) HLAMB=H*SQRT(STNUM/STDEN) 
+            IF (STDEN.GT.UROUND) HLAMB=H*SQRT(STNUM/STDEN) 
             IF (HLAMB.GT.3.25D0) THEN
+               XSTIFF1=MIN(X,XSTIFF1)
                NONSTI=0
                IASTI=IASTI+1  
                IF (IASTI.EQ.15) THEN
-                  IF (IPRINT.GT.0) WRITE (IPRINT,*) 
-     &               ' THE PROBLEM SEEMS TO BECOME STIFF AT X = ',X   
+                  IF (IPRINT.GT.0) WRITE (IPRINT,'(A,ES23.15,A,I5)') 
+     &               'THE PROBLEM SEEMS TO BECOME STIFF AT X =',XSTIFF1,
+     &               ', ACCEPTED STEP =',NACCPT
                   IF (IPRINT.LE.0) GOTO 76
                END IF
             ELSE
                NONSTI=NONSTI+1  
-               IF (NONSTI.EQ.6) IASTI=0
+               IF (NONSTI.EQ.6) THEN
+                  XSTIFF1=XEND
+                  IASTI=0
+               END IF
             END IF
          END IF 
          IF (IOUT.GE.2) THEN 
@@ -507,6 +516,13 @@ C ------- STIFFNESS DETECTION
          DO 44 I=1,N
          K1(I)=K2(I)
   44     Y(I)=Y1(I)
+C ------- Dorival -- start
+         IF (DEBUG) THEN
+            write(*,444)NSTEP,ERR,HNEW,IASTI,NONSTI,HLAMB
+         END IF
+  444 FORMAT('step(A) =',I5,', err =',ES23.15,', h_new =',ES23.15,
+     & ', n_yes =',I4,', n_no =',I4,', h*lambda =',ES23.15)
+C ------- Dorival -- end
          XOLD=X
          X=XPH
          IF (IOUT.NE.0) THEN
@@ -530,6 +546,12 @@ C --- STEP IS REJECTED
          REJECT=.TRUE.  
          IF(NACCPT.GE.1)NREJCT=NREJCT+1   
          LAST=.FALSE.
+C ------- Dorival -- start
+         IF (DEBUG) THEN
+            write(*,445)NSTEP,ERR,HNEW
+         END IF
+  445 FORMAT('step(R) =',I5,', err =',ES23.15,', h_new =',ES23.15)
+C ------- Dorival -- end
       END IF
       H=HNEW
       GOTO 1

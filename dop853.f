@@ -1,6 +1,6 @@
       SUBROUTINE DOP853(N,FCN,X,Y,XEND,
      &                  RTOL,ATOL,ITOL,
-     &                  SOLOUT,IOUT,
+     &                  SOLOUT,IOUT,DEBUG,
      &                  WORK,LWORK,IWORK,LIWORK,RPAR,IPAR,IDID)
 C ----------------------------------------------------------
 C     NUMERICAL SOLUTION OF A SYSTEM OF FIRST 0RDER
@@ -190,7 +190,7 @@ C *** *** *** *** *** *** *** *** *** *** *** *** ***
       IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       DIMENSION Y(N),ATOL(*),RTOL(*),WORK(LWORK),IWORK(LIWORK)
       DIMENSION RPAR(*),IPAR(*)
-      LOGICAL ARRET
+      LOGICAL ARRET,DEBUG
       EXTERNAL FCN,SOLOUT
 C *** *** *** *** *** *** ***
 C        SETTING THE PARAMETERS 
@@ -343,7 +343,7 @@ C -------- CALL TO CORE INTEGRATOR ------------
      &   WORK(IEK1),WORK(IEK2),WORK(IEK3),WORK(IEK4),WORK(IEK5),
      &   WORK(IEK6),WORK(IEK7),WORK(IEK8),WORK(IEK9),WORK(IEK10),
      &   WORK(IEY1),WORK(IECO),IWORK(ICOMP),NRDENS,RPAR,IPAR,
-     &   NFCN,NSTEP,NACCPT,NREJCT)
+     &   NFCN,NSTEP,NACCPT,NREJCT,DEBUG)
       WORK(7)=H
       IWORK(17)=NFCN
       IWORK(18)=NSTEP
@@ -360,7 +360,7 @@ C
       SUBROUTINE DP86CO(N,FCN,X,Y,XEND,HMAX,H,RTOL,ATOL,ITOL,IPRINT,
      &   SOLOUT,IOUT,IDID,NMAX,UROUND,METH,NSTIFF,SAFE,BETA,FAC1,FAC2,
      &   K1,K2,K3,K4,K5,K6,K7,K8,K9,K10,Y1,CONT,ICOMP,NRD,RPAR,IPAR,
-     &   NFCN,NSTEP,NACCPT,NREJCT)
+     &   NFCN,NSTEP,NACCPT,NREJCT,DEBUG)
 C ----------------------------------------------------------
 C     CORE INTEGRATOR FOR DOP853
 C     PARAMETERS SAME AS IN DOP853 WITH WORKSPACE ADDED 
@@ -538,7 +538,7 @@ C ----------------------------------------------------------
       DOUBLE PRECISION Y(N),Y1(N),K1(N),K2(N),K3(N),K4(N),K5(N),K6(N)
       DOUBLE PRECISION K7(N),K8(N),K9(N),K10(N),ATOL(*),RTOL(*)     
       DIMENSION CONT(8*NRD),ICOMP(NRD),RPAR(*),IPAR(*)
-      LOGICAL REJECT,LAST 
+      LOGICAL REJECT,LAST,DEBUG 
       EXTERNAL FCN
       COMMON /CONDO8/XOLD,HOUT
 C *** *** *** *** *** *** ***
@@ -555,6 +555,7 @@ C --- INITIAL PREPARATIONS
       LAST=.FALSE. 
       HLAMB=0.D0
       IASTI=0
+      NONSTI=0
       CALL FCN(N,X,Y,K1,RPAR,IPAR)
       HMAX=ABS(HMAX)     
       IORD=8  
@@ -563,6 +564,8 @@ C --- INITIAL PREPARATIONS
       NFCN=NFCN+2
       REJECT=.FALSE.
       XOLD=X
+C --- dorival
+      XSTIFF1=XEND
       IF (IOUT.GE.1) THEN 
           IRTRN=1 
           HOUT=1.D0
@@ -670,18 +673,24 @@ C ------- STIFFNESS DETECTION
                STNUM=STNUM+(K4(I)-K3(I))**2
                STDEN=STDEN+(K5(I)-Y1(I))**2
  64         CONTINUE  
-            IF (STDEN.GT.0.D0) HLAMB=ABS(H)*SQRT(STNUM/STDEN) 
+C dorival    IF (STDEN.GT.0.D0) HLAMB=ABS(H)*SQRT(STNUM/STDEN) 
+            IF (STDEN.GT.UROUND) HLAMB=ABS(H)*SQRT(STNUM/STDEN) 
             IF (HLAMB.GT.6.1D0) THEN
+               XSTIFF1=MIN(X,XSTIFF1)
                NONSTI=0
                IASTI=IASTI+1  
                IF (IASTI.EQ.15) THEN
-                  IF (IPRINT.GT.0) WRITE (IPRINT,*) 
-     &               ' THE PROBLEM SEEMS TO BECOME STIFF AT X = ',X   
+                  IF (IPRINT.GT.0) WRITE (IPRINT,'(A,ES23.15,A,I5)') 
+     &               'THE PROBLEM SEEMS TO BECOME STIFF AT X =',XSTIFF1,
+     &               ', ACCEPTED STEP =',NACCPT
                   IF (IPRINT.LE.0) GOTO 76
                END IF
             ELSE
                NONSTI=NONSTI+1  
-               IF (NONSTI.EQ.6) IASTI=0
+               IF (NONSTI.EQ.6) THEN
+                  XSTIFF1=XEND
+                  IASTI=0
+               END IF
             END IF
          END IF 
 C ------- FINAL PREPARATION FOR DENSE OUTPUT
@@ -720,7 +729,13 @@ C ---     THE NEXT THREE FUNCTION EVALUATIONS
      &            +A168*K8(I)+A169*K9(I)+A1613*K4(I)+A1614*K10(I)
      &            +A1615*K2(I))
             CALL FCN(N,X+C16*H,Y1,K3,RPAR,IPAR)
+C --- Dorival (disable counting extra function calls if debugging)
+            IF (.NOT.DEBUG) THEN
+C --- Dorival
             NFCN=NFCN+3 
+C --- Dorival
+            END IF
+C --- Dorival
 C ---     FINAL PREPARATION
             DO 63 J=1,NRD
                I=ICOMP(J)
@@ -738,6 +753,13 @@ C ---     FINAL PREPARATION
          DO 67 I=1,N
          K1(I)=K4(I)
   67     Y(I)=K5(I)
+C ------- Dorival -- start
+         IF (DEBUG) THEN
+            write(*,444)NSTEP,ERR,HNEW,IASTI,NONSTI,HLAMB
+         END IF
+  444 FORMAT('step(A) =',I5,', err =',ES23.15,', h_new =',ES23.15,
+     & ', n_yes =',I4,', n_no =',I4,', h*lambda =',ES23.15)
+C ------- Dorival -- end
          XOLD=X
          X=XPH
          IF (IOUT.GE.1) THEN
@@ -760,6 +782,12 @@ C --- STEP IS REJECTED
          REJECT=.TRUE.  
          IF(NACCPT.GE.1)NREJCT=NREJCT+1   
          LAST=.FALSE.
+C ------- Dorival -- start
+         IF (DEBUG) THEN
+            write(*,445)NSTEP,ERR,HNEW
+         END IF
+  445 FORMAT('step(R) =',I5,', err =',ES23.15,', h_new =',ES23.15)
+C ------- Dorival -- end
       END IF
       H=HNEW
       GOTO 1

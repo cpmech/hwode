@@ -25,7 +25,9 @@ file(GLOB all *.f)
 
 add_library(hwode STATIC
     hinit.f
+    dc_decsol.f
     dc_lapack.f
+    decsol.f
     dop853.f
     dopri5.f
     odex2.f
@@ -34,6 +36,7 @@ add_library(hwode STATIC
     radau.f
     retard.f
     rodas.f
+    sdirk4.f
     seulex.f
 )
 target_link_libraries(hwode ${LIBS})

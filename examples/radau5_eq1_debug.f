@@ -8,8 +8,9 @@ C --- PARAMETERS FOR RADAU5 (FULL JACOBIAN)
         PARAMETER (ND=1,LWORK=4*ND*ND+12*ND+20,LIWORK=3*ND+20)
         DIMENSION Y(ND),WORK(LWORK),IWORK(LIWORK)
         EXTERNAL FCN,JAC,SOLOUT
+        LOGICAL DEBUG
 C --- PARAMETER IN THE DIFFERENTIAL EQUATION
-        RPAR=1.0D-6
+        LAMB=-50.0D0
 C --- DIMENSION OF THE SYSTEM
         N=1
 C --- COMPUTE THE JACOBIAN ANALYTICALLY
@@ -37,61 +38,55 @@ C --- SET DEFAULT VALUES
            WORK(I)=0.D0
         END DO
 C --- CALL OF THE SUBROUTINE RADAU5
+        write(*,'(A)')''
+        write(*,'(A)')'running radau5.f test'
+        DEBUG=.TRUE.
         CALL RADAU5(N,FCN,X,Y,XEND,H,
      &                  RTOL,ATOL,ITOL,
      &                  JAC,IJAC,MLJAC,MUJAC,
      &                  FCN,IMAS,MLMAS,MUMAS,
-     &                  SOLOUT,IOUT,
-     &                  WORK,LWORK,IWORK,LIWORK,RPAR,IPAR,IDID)
+     &                  SOLOUT,IOUT,DEBUG,
+     &                  WORK,LWORK,IWORK,LIWORK,LAMB,IPAR,IDID)
 C --- PRINT FINAL SOLUTION
-        WRITE (6,99) X,Y(1)
- 99     FORMAT(1X,'X =',F5.2,'    Y =',1E18.10)
-C --- PRINT STATISTICS
-        WRITE (6,90) RTOL
- 90     FORMAT('       rtol=',D8.2)
-        WRITE (6,91) (IWORK(J),J=14,20)
- 91     FORMAT(' fcn=',I5,' jac=',I4,' step=',I4,' accpt=',I4,
-     &        ' rejct=',I3,' dec=',I4,' sol=',I5)
+      write(*,'(A)',advance='no')'Radau5: Radau method (Radau IIA) '
+      write(*,'(A)')'(implicit, order 5, embedded)'
+      write(*,'(A,I0)')'Number of function evaluations   = ',1+IWORK(14)
+      write(*,'(A,I0)')'Number of Jacobian evaluations   = ',IWORK(15)
+      write(*,'(A,I0)')'Number of factorizations         = ',IWORK(19)
+      write(*,'(A,I0)')'Number of lin sys solutions      = ',IWORK(20)
+      write(*,'(A,I0)')'Number of performed steps        = ',IWORK(16)
+      write(*,'(A,I0)')'Number of accepted steps         = ',IWORK(17)
+      write(*,'(A,I0)')'Number of rejected steps         = ',IWORK(18)
+      write(*,'(A,I0)')'Number of iterations (maximum)   = ',IWORK(21)
+      write(*,'(A,ES23.15)')'y =',Y(1)
+      write(*,'(A,ES23.15)')'h =',H
         STOP
         END
 C
 C
-        SUBROUTINE SOLOUT (NR,XOLD,X,Y,CONT,LRC,N,RPAR,IPAR,IRTRN)
+        SUBROUTINE SOLOUT (NR,XOLD,X,Y,CONT,LRC,N,LAMB,IPAR,IRTRN)
 C --- PRINTS SOLUTION AT EQUIDISTANT OUTPUT-POINTS BY USING "CONTR5"
         IMPLICIT REAL*8 (A-H,O-Z)
         DIMENSION Y(N),CONT(LRC)
         COMMON /INTERN/XOUT
-        IF (NR.EQ.1) THEN
-           WRITE (6,99) X,Y(1),NR-1
-           XOUT=0.2D0
-        ELSE
- 10        CONTINUE
-           IF (X.GE.XOUT) THEN
-C --- CONTINUOUS OUTPUT FOR RADAU5
-              WRITE (6,99) XOUT,CONTR5(1,XOUT,CONT,LRC),NR-1
-              XOUT=XOUT+0.2D0
-              GOTO 10
-           END IF
-        END IF
- 99     FORMAT(1X,'X =',F5.2,'    Y =',1E18.10,'    NSTEP =',I4)
         RETURN
         END
 C
 C
-        SUBROUTINE FCN(N,X,Y,F,RPAR,IPAR)
+        SUBROUTINE FCN(N,X,Y,F,LAMB,IPAR)
 C --- RIGHT-HAND SIDE OF HW-EQ1
         IMPLICIT REAL*8 (A-H,O-Z)
         DIMENSION Y(N),F(N)
-        F(1)=RPAR*(Y(1)-DCOS(X))
+        F(1)=LAMB*(Y(1)-DCOS(X))
         RETURN
         END 
 C
 C
-        SUBROUTINE JAC(N,X,Y,DFY,LDFY,RPAR,IPAR)
+        SUBROUTINE JAC(N,X,Y,DFY,LDFY,LAMB,IPAR)
 C --- JACOBIAN OF HW-EQ1
         IMPLICIT REAL*8 (A-H,O-Z)
         DIMENSION Y(N),DFY(LDFY,N)
-        DFY(1,1)=RPAR
+        DFY(1,1)=LAMB
         RETURN
         END
 

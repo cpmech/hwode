@@ -10,6 +10,7 @@ C --- PARAMETERS FOR RADAU5
 C -------- END PARAMETER LIST --------
         REAL*4 TARRAY(2),TRESULT
         EXTERNAL FBRUS,JBRUS,SOLOUT
+        LOGICAL DEBUG
 c ------ FILE DE DONNEES ----------
         OPEN(8,FILE='res_rad5')
         REWIND 8
@@ -59,11 +60,12 @@ C --- SET DEFAULT VALUES
            ISTAT(I)=0
         END DO
         CALL DTIME(TARRAY,TRESULT)
+        DEBUG=.FALSE.
         CALL RADAU5(N2,FBRUS,X,Y,XEND,H,
      &                  RTOL,ATOL,ITOL,
      &                  JBRUS,IJAC,MLJAC,MUJAC,
      &                  FBRUS,IMAS,MLMAS,MUMAS,
-     &                  SOLOUT,IOUT,
+     &                  SOLOUT,IOUT,DEBUG,
      &                  WORK,LWORK,IWORK,LIWORK,RPAR,IPAR,IDID)
 C --- PRINT SOLUTION
         CALL DTIME(TARRAY,TRESULT)

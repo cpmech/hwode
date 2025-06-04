@@ -9,6 +9,7 @@ C --- PARAMETERS FOR RADAU5 (FULL JACOBIAN)
 C -------- END PARAMETER LIST --------
         REAL*4 TARRAY(2),TRESULT
         EXTERNAL FTIGE,SOLOUT
+        LOGICAL DEBUG
 c ------ FILE DE DONNEES ----------
         OPEN(8,FILE='res_rad5')
         REWIND 8
@@ -58,11 +59,12 @@ C --- DIFFERENTIAL EQUATION IS IN EXPLICIT FORM
         IMAS=0
         CALL DTIME(TARRAY,TRESULT)
 C --- CALL OF THE SUBROUTINE RADAU5
+        DEBUG=.FALSE.
         CALL RADAU5(NN,FTIGE,T,Y,TEND,H,
      &                  RTOL,ATOL,ITOL,
      &                  FTIGE,IJAC,MLJAC,MUJAC,
      &                  FTIGE,IMAS,MLMAS,MUMAS,
-     &                  SOLOUT,IOUT,
+     &                  SOLOUT,IOUT,DEBUG,
      &                  WORK,LWORK,IWORK,LIWORK,RPAR,IPAR,IDID)
         CALL DTIME(TARRAY,TRESULT)
 C --- PRINT SOLUTION

@@ -3,12 +3,12 @@ C --- DRIVER FOR RADAU5 ON BRUSS-2D
 C * * * * * * * * * * * * * * * * * * * * * * * * *
         IMPLICIT REAL*8 (A-H,O-Z)
 C --- PARAMETERS FOR RADAU5 (FULL JACOBIAN)
-        PARAMETER (NSD=128,ND=NSD*NSD*2,LJAC=1,LMAS=0,LE=1)
+        PARAMETER (NSD=36,ND=NSD*NSD*2,LJAC=1,LMAS=0,LE=1)
         PARAMETER (LWORK=ND*(LJAC+LMAS+3*LE+12)+20,LIWORK=3*ND+20)
         DIMENSION Y(ND),WORK(LWORK),IWORK(LIWORK),ISTAT(20)
 C -------- END PARAMETER LIST --------
         REAL*4 TARRAY(2),TRESULT
-        EXTERNAL FBRUS,JBRUS,SOLOUT
+        EXTERNAL FBRUS,JBRUSF,SOLOUT
         LOGICAL DEBUG
         COMMON/TRANS/ALF,NS,NSSQ,NSNSM1,NSM1SQ
         COMMON /FOURIER/TCOS(512),NF(2),ALPH,NDIM,NSF,NSSQF
@@ -16,7 +16,7 @@ c ------ FILE DE DONNEES ----------
         OPEN(8,FILE='res_rad5')
         REWIND 8
 C ----- DIMENSIONS --------
-      NS=128
+      NS=36
       NSSQ=NS*NS
       NSNSM1=NS*(NS-1)
       N=2*NSSQ 
@@ -39,6 +39,7 @@ C --- LOOP FOR DIFFERENT TOLERANCES
         NRLOOP=(NTOLMX-NTOLMN)*NTOLDF+1
         TOLST=0.1D0**NTOLMN
         TOLFC=0.1D0**(1.D0/NTOLDF)
+        NRLOOP=1
         DO 30 NTOL=1,NRLOOP
 C --- FOR THE USE OF  DC_DECSOL_2D.F
         IJAC=1
@@ -78,14 +79,14 @@ C --- SET DEFAULT VALUES
            ISTAT(I)=0
         END DO
 C --- ENDPOINT OF INTEGRATION
-        XEND=1.5D0
+        XEND=0.01D0
         CALL DTIME(TARRAY,TRESULT)
         DO 20 I=1,2
 C --- CALL OF THE SUBROUTINE RADAU5
         DEBUG=.FALSE.
         CALL RADAU5(N,FBRUS,X,Y,XEND,H,
      &                  RTOL,ATOL,ITOL,
-     &                  JBRUS,IJAC,MLJAC,MUJAC,
+     &                  JBRUSF,IJAC,MLJAC,MUJAC,
      &                  FBRUS,IMAS,MLMAS,MUMAS,
      &                  SOLOUT,IOUT,DEBUG,
      &                  WORK,LWORK,IWORK,LIWORK,RPAR,IPAR,IDID)
@@ -121,3 +122,103 @@ C
  99     FORMAT(1X,'X =',F5.2,'    Y =',3E18.10,'    NSTEP =',I4)
         RETURN
         END
+C
+        SUBROUTINE FBRUS(N,X,Y,F,RPAR,IPAR)
+C ------ BRUSSELATOR WITH DIFFUSION IN D2 ----
+        IMPLICIT REAL*8 (A-H,O-Z)
+        DIMENSION Y(N),F(N)
+        COMMON /COUNT / NFCN 
+        COMMON/TRANS/ALF,NS,NSSQ,NSNSM1,NSM1SQ
+        NFCN=NFCN+1
+C ---- CONSTANTS FOR INHOMOGENITY ---
+        ANS=NS
+        RADSQ=0.1D0**2
+        IF(X.GE.1.1D0)THEN
+         BET=5.00D0
+        ELSE
+         BET=0.00D0
+        END IF
+C ------- GRANDE BOUCLE -----
+      DO I=1,NSSQ
+C ------- LEFT NEIGHBOUR ---
+         IF(MOD(I,NS).EQ.1)THEN
+            ULEFT=Y(I+NS-1)
+            VLEFT=Y(NSSQ+I+NS-1)
+         ELSE
+            ULEFT=Y(I-1)
+            VLEFT=Y(NSSQ+I-1)
+         END IF
+C ------- RIGHT NEIGHBOUR ---
+         IF(MOD(I,NS).EQ.0)THEN
+            URIGHT=Y(I-NS+1)
+            VRIGHT=Y(NSSQ+I-NS+1)
+         ELSE
+            URIGHT=Y(I+1)
+            VRIGHT=Y(NSSQ+I+1)
+         END IF
+C ------- LOWER NEIGHBOUR ---
+         IF(I.LE.NS)THEN
+            ULOW=Y(I+NSNSM1)
+            VLOW=Y(NSSQ+I+NSNSM1)
+         ELSE
+            ULOW=Y(I-NS)
+            VLOW=Y(NSSQ+I-NS)
+         END IF
+C ------- UPPER NEIGHBOUR ---
+         IF(I.GT.NSNSM1)THEN
+            UUP=Y(I-NSNSM1)
+            VUP=Y(NSSQ+I-NSNSM1)
+         ELSE
+            UUP=Y(I+NS)
+            VUP=Y(NSSQ+I+NS)
+         END IF
+C ------ LA DERIVEE --------
+         UIJ=Y(I)
+         VIJ=Y(I+NSSQ)
+         F(I)=1.D0+UIJ*UIJ*VIJ-4.4D0*UIJ
+     &        +ALF*NSSQ*(ULEFT+URIGHT+ULOW+UUP-4.D0*UIJ)
+         F(I+NSSQ)=3.4D0*UIJ - UIJ*UIJ*VIJ
+     &        +ALF*NSSQ*(VLEFT+VRIGHT+VLOW+VUP-4.D0*VIJ)
+C ----- INHOMOGENITE ----
+         IY=(I-1)/NS+1
+         IX=I-(IY-1)*NS
+         YY=IY/ANS
+         XX=IX/ANS
+         IF(((XX-0.3D0)**2+(YY-0.6D0)**2).LE.RADSQ)THEN
+           F(I)=F(I)+BET
+         END IF
+      END DO
+      RETURN
+      END
+C
+        SUBROUTINE JBRUSF(N,X,Y,DFY,LDFY,RPAR,IPAR)
+C --- JACOBIAN OF BRUSS-2D (FULL)
+        IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+        DIMENSION Y(N),DFY(LDFY,N)
+        COMMON/TRANS/ALF,NS,NSSQ,NSNSM1,NSM1SQ
+        FAC=ALF*NSSQ
+         DO I=1,N
+            DO J=1,N
+               DFY(I,J)=0.0D0
+            END DO
+            DFY(I,I)=-FAC*4.0D0
+         END DO
+         DO I=1,N
+            IL=I-1
+            IF (MOD(I,NS).EQ.1) IL=I-1+NS
+            DFY(I,IL)=FAC
+            IR=I+1
+            IF (MOD(I,NS).EQ.0) IR=I+1-NS
+            DFY(I,IR)=FAC
+            IU=I+NS
+            IF (I.GT.NS*(NS-1).AND.I.LE.NS*NS) IU=I-NS*(NS-1)
+            IF (I.GT.NS*(2*NS-1)) IU=I-NS*(NS-1)
+            DFY(I,IU)=FAC
+            ID=I-NS
+            IF (I.LE.NS) ID=I+NS*(NS-1)
+            IF (I.LE.NS*(NS+1).AND.I.GT.NS*NS) ID=I+NS*(NS-1)
+            DFY(I,ID)=FAC
+         END DO
+      RETURN
+      END
+

@@ -2,10 +2,11 @@ C * * * * * * * * * * * * * * * * * * * * * * * * *
 C --- DRIVER FOR DOPRI5 ON ARENSTORF ORBIT
 C * * * * * * * * * * * * * * * * * * * * * * * * *
         IMPLICIT REAL*8 (A-H,O-Z)
-        PARAMETER (NDGL=4,NRDENS=2)
+        PARAMETER (NDGL=4,NRDENS=4)
         PARAMETER (LWORK=8*NDGL+5*NRDENS+21,LIWORK=NRDENS+21)
         DIMENSION Y(NDGL),WORK(LWORK),IWORK(LIWORK),RPAR(2)
         EXTERNAL FAREN,SOLOUT
+        LOGICAL DEBUG
 C --- DIMENSION OF THE SYSTEM
         N=NDGL
 C --- OUTPUT ROUTINE (AND DENSE OUTPUT) IS USED DURING INTEGRATION
@@ -27,22 +28,29 @@ C --- DEFAULT VALUES FOR PARAMETERS
         DO 10 I=1,20
         IWORK(I)=0
   10    WORK(I)=0.D0  
+C --- DORIVAL: INITIAL STEPSIZE
+        WORK(7)=1.0D-4
 C --- DENSE OUTPUT IS USED FOR THE TWO POSITION COORDINATES 1 AND 2
         IWORK(5)=NRDENS
         IWORK(21)=1
         IWORK(22)=2
 C --- CALL OF THE SUBROUTINE DOPRI5   
+        write(*,'(A)')''
+        write(*,'(A)')'running dopri5.f test'
+        DEBUG=.FALSE.
         CALL DOPRI5(N,FAREN,X,Y,XEND,
      &              RTOL,ATOL,ITOL,
-     &              SOLOUT,IOUT,
+     &              SOLOUT,IOUT,DEBUG,
      &              WORK,LWORK,IWORK,LIWORK,RPAR,IPAR,IDID)
 C --- PRINT FINAL SOLUTION
-        WRITE (6,99) Y(1),Y(2)
- 99     FORMAT(1X,'X = XEND     Y =',2E18.10)
-C --- PRINT STATISTICS
-        WRITE (6,91) RTOL,(IWORK(J),J=17,20)
- 91     FORMAT('     tol=',D8.2,'   fcn=',I5,' step=',I4,
-     &             ' accpt=',I4,' rejct=',I3)
+      write(*,'(A)',advance='no')'DoPri5: Dormand-Prince method '
+      write(*,'(A)')'(explicit, order 5(4), embedded)'
+      write(*,'(A,I0)')'Number of function evaluations   = ',IWORK(17)
+      write(*,'(A,I0)')'Number of performed steps        = ',IWORK(18)
+      write(*,'(A,I0)')'Number of accepted steps         = ',IWORK(19)
+      write(*,'(A,I0)')'Number of rejected steps         = ',IWORK(20)
+      write(*,'(A,4ES23.15)')'y =',Y(1),Y(2),Y(3),Y(4)
+      write(*,'(A,ES23.15)')'h =',WORK(7)
         STOP
         END
 C
@@ -53,18 +61,20 @@ C --- PRINTS SOLUTION AT EQUIDISTANT OUTPUT-POINTS BY USING "CONTD5"
         DIMENSION Y(N),CON(5*ND),ICOMP(ND),RPAR(2)
         COMMON /INTERN/XOUT
         IF (NR.EQ.1) THEN
-           WRITE (6,99) X,Y(1),Y(2),NR-1
-           XOUT=X+2.0D0
+           WRITE (6,99) NR-1,X,Y(1),Y(2),Y(3),Y(4)
+           XOUT=X+1.0D0
         ELSE
  10        CONTINUE
            IF (X.GE.XOUT) THEN
-              WRITE (6,99) XOUT,CONTD5(1,XOUT,CON,ICOMP,ND),
-     &                     CONTD5(2,XOUT,CON,ICOMP,ND),NR-1
-              XOUT=XOUT+2.0D0
+              WRITE (6,99) NR-1,XOUT,CONTD5(1,XOUT,CON,ICOMP,ND),
+     &                     CONTD5(2,XOUT,CON,ICOMP,ND),
+     &                     CONTD5(3,XOUT,CON,ICOMP,ND),
+     &                     CONTD5(4,XOUT,CON,ICOMP,ND)
+              XOUT=XOUT+1.0D0
               GOTO 10
            END IF
         END IF
- 99     FORMAT(1X,'X =',F6.2,'    Y =',2E18.10,'    NSTEP =',I4)
+ 99     FORMAT('step =',I4,', x =',F6.2,', y =',4ES23.15)
         RETURN
         END
 C

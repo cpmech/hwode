@@ -13,6 +13,7 @@ C --- DECLARATIONS
         COMMON/TRANS/QQ,UZERO
         REAL*4 TARRAY(2),TRESULT
         EXTERNAL FKS,JKS,SOLOUT
+        LOGICAL DEBUG
 C --- DATA FOR THE PROBLEM
         QQ=0.025D0
 c ------ FILE DE DONNEES ----------
@@ -75,11 +76,12 @@ C --- SET DEFAULT VALUES
          END DO
 C --- CALL OF THE SUBROUTINE RADAU5
         CALL DTIME(TARRAY,TRESULT)
+        DEBUG=.FALSE.
          CALL RADAU5(ND,FKS,T,Y,TEND,H,
      &                  RTOL,ATOL,ITOL,
      &                  JKS,IJAC,MLJAC,MUJAC,
      &                  JKS,IMAS,MLMAS,MUMAS,
-     &                  SOLOUT,IOUT,
+     &                  SOLOUT,IOUT,DEBUG,
      &                  WORK,LWORK,IWORK,LIWORK,RPAR,IPAR,IDID)
 C --- PRINT SOLUTION
         CALL DTIME(TARRAY,TRESULT)

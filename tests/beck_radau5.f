@@ -9,6 +9,7 @@ C --- PARAMETERS FOR RADAU5 (FULL JACOBIAN)
 C -------- END PARAMETER LIST --------
         REAL*4 TARRAY(2),TRESULT
         EXTERNAL FBECK,JBECK,FBECKD,JBECKD,MBECK,SOLOUT,JBECKF
+        LOGICAL DEBUG
         COMMON /PRJECTION/RHO,FACT
         COMMON /COEFF/B(5000),RHO1
         R0=0.0D0
@@ -67,11 +68,12 @@ C --- ENDPOINT OF INTEGRATION
         CALL DTIME(TARRAY,TRESULT)
         DO 20 I=1,15
 C --- CALL OF THE SUBROUTINE RADAU5
+        DEBUG=.FALSE.
         CALL RADAU5(N,FBECK,X,Y,XEND,H,
      &                  RTOL,ATOL,ITOL,
      &                  JBECK,IJAC,MLJAC,MUJAC,
      &                  MBECK,IMAS,MLMAS,MUMAS,
-     &                  SOLOUT,IOUT,
+     &                  SOLOUT,IOUT,DEBUG,
      &                  WORK,LWORK,IWORK,LIWORK,RPAR,IPAR,IDID)
 C --- PRINT SOLUTION
         WRITE (8,*) Y(1)
