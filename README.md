@@ -37,6 +37,10 @@ References:
 9. SEULEX Extrapolation method based on linearly implicit Euler for problems of the form My'=f(x,y)
    with possibly singular matrix M; with dense output
 
+### Oldies
+
+10. SDIRK4 a diagonally-implicit Runge-Kutta method of order 4 for problems of the form My'=f(x,y) with possibly singular matrix M; with dense output
+
 ## Usage
 
 The code is easily compiled using CMake.
